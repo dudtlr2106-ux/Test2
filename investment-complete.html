@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>투자 관리 시스템 Complete</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --purple: #8b5cf6;
+            --dark: #1f2937;
+            --gray: #6b7280;
+            --light: #f3f4f6;
+            --border: #e5e7eb;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* 헤더 */
+        header {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            color: var(--dark);
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: none;
+            background: var(--light);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-icon:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .nav-tab {
+            padding: 12px 20px;
+            background: var(--light);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--dark);
+            transition: all 0.3s;
+            white-space: nowrap;
+            font-size: 14px;
+        }
+
+        .nav-tab.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .nav-tab:hover:not(.active) {
+            background: #e5e7eb;
+        }
+
+        /* 섹션 */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 카드 */
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: var(--dark);
+            font-size: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 그리드 */
+        .grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); }
+        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+        .grid-4 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+
+        /* 통계 카드 */
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-change {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        /* 차트 */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        /* 아이템 카드 */
+        .item-card {
+            background: var(--light);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .item-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .item-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--dark);
+        }
+
+        .item-meta {
+            display: flex;
+            gap: 15px;
+            margin: 10px 0;
+            font-size: 14px;
+            color: var(--gray);
+            flex-wrap: wrap;
+        }
+
+        .item-content {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 12px;
+            line-height: 1.6;
+            color: #4b5563;
+        }
+
+        /* 폼 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* 버튼 */
+        button {
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary { background: var(--gray); }
+        .btn-success { background: var(--success); }
+        .btn-danger { background: var(--danger); }
+        .btn-warning { background: var(--warning); }
+        .btn-sm { padding: 8px 16px; font-size: 13px; }
+
+        /* 배지 */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-high { background: #fee2e2; color: var(--danger); }
+        .badge-medium { background: #fef3c7; color: var(--warning); }
+        .badge-low { background: #dbeafe; color: var(--primary); }
+        .badge-success { background: #d1fae5; color: var(--success); }
+
+        /* 진행률 */
+        .progress {
+            width: 100%;
+            height: 12px;
+            background: var(--light);
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--primary));
+            transition: width 0.5s ease;
+        }
+
+        /* 스코어 */
+        .score-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .score-label {
+            min-width: 100px;
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .score-bar {
+            flex: 1;
+            height: 10px;
+            background: var(--light);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            transition: width 0.5s;
+        }
+
+        .score-value {
+            min-width: 40px;
+            text-align: right;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* 테이블 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th {
+            background: var(--light);
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        tr:hover {
+            background: var(--light);
+        }
+
+        /* 빈 상태 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* 가격 표시 */
+        .price-up { color: var(--danger); }
+        .price-down { color: var(--primary); }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .grid, .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 { font-size: 22px; }
+            .stat-value { font-size: 24px; }
+            .chart-container { height: 250px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-top">
+                <div>
+                    <h1>📊 투자 관리 시스템 Complete</h1>
+                    <p class="subtitle">올인원 투자 관리 플랫폼</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-icon" onclick="exportData()" title="데이터 내보내기">📥</button>
+                    <button class="btn-icon" onclick="document.getElementById('importFile').click()" title="데이터 가져오기">📤</button>
+                    <input type="file" id="importFile" style="display: none" accept=".json" onchange="importData(event)">
+                </div>
+            </div>
+            
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showSection('dashboard')">📊 대시보드</button>
+                <button class="nav-tab" onclick="showSection('principles')">📜 투자 원칙</button>
+                <button class="nav-tab" onclick="showSection('watchlist')">👀 관심 종목</button>
+                <button class="nav-tab" onclick="showSection('portfolio')">💼 포트폴리오</button>
+                <button class="nav-tab" onclick="showSection('trades')">📈 매매 일지</button>
+                <button class="nav-tab" onclick="showSection('analysis')">🔍 종목 분석</button>
+                <button class="nav-tab" onclick="showSection('performance')">📉 수익률</button>
+                <button class="nav-tab" onclick="showSection('goals')">🏆 목표</button>
+                <button class="nav-tab" onclick="showSection('tax')">💰 세금</button>
+            </div>
+        </header>
+
+        <main id="mainContent">
+            <!-- 대시보드 -->
+            <div id="dashboard" class="section active">
+                <div class="grid grid-4">
+                    <div class="stat-card">
+                        <div class="stat-label">총 자산</div>
+                        <div class="stat-value" id="totalAssets">0원</div>
+                        <div class="stat-change" id="assetsChange">전일 대비 0원</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">총 수익률</div>
+                        <div class="stat-value" id="totalReturn">0%</div>
+                        <div class="stat-change" id="returnAmount">+0원</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">보유 종목</div>
+                        <div class="stat-value" id="stockCount">0개</div>
+                        <div class="stat-change" id="avgReturn">평균 0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">이번 달</div>
+                        <div class="stat-value" id="monthTrades">0회</div>
+                        <div class="stat-change" id="monthProfit">0원</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>📈 포트폴리오 추이</h2>
+                    <div class="chart-container">
+                        <canvas id="portfolioChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="grid grid-2">
+                    <div class="card">
+                        <h2>💡 빠른 메모</h2>
+                        <textarea id="quickMemo" placeholder="오늘의 시장 상황, 아이디어 등..."></textarea>
+                        <button onclick="saveQuickMemo()" style="margin-top: 10px;">💾 저장</button>
+                    </div>
+                    <div class="card">
+                        <h2>🎯 오늘의 원칙</h2>
+                        <div id="todayPrinciple"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 투자 원칙 -->
+            <div id="principles" class="section">
+                <div class="card">
+                    <h2>📜 나의 투자 원칙</h2>
+                    <div id="principlesList"></div>
+                    
+                    <hr style="margin: 30px 0; border: none; border-top: 2px solid var(--light);">
+                    
+                    <h3 style="margin-bottom: 20px;">새 원칙 추가</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>원칙 제목</label>
+                            <input type="text" id="principleTitle" placeholder="예: 손절 원칙">
+                        </div>
+                        <div class="form-group">
+                            <label>중요도</label>
+                            <select id="principlePriority">
+                                <option value="high">높음</option>
+                                <option value="medium">보통</option>
+                                <option value="low">낮음</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>내용</label>
+                        <textarea id="principleContent" placeholder="상세 내용..."></textarea>
+                    </div>
+                    <button onclick="addPrinciple()">➕ 원칙 추가</button>
+                </div>
+            </div>
+
+            <!-- 관심 종목 -->
+            <div id="watchlist" class="section">
+                <div class="card">
+                    <h2>👀 관심 종목</h2>
+                    <div id="watchlistItems"></div>
+                    
+                    <hr style="margin: 30px 0; border: none; border-top: 2px solid var(--light);">
+                    
+                    <h3 style="margin-bottom: 20px;">새 종목 추가</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>종목명</label>
+                            <input type="text" id="stockName" placeholder="예: 삼성전자">
+                        </div>
+                        <div class="form-group">
+                            <label>종목 코드</label>
+                            <input type="text" id="stockCode" placeholder="예: 005930">
+                        </div>
+                        <div class="form-group">
+                            <label>현재가</label>
+                            <input type="number" id="stockPrice" placeholder="70000">
+                        </div>
+                        <div class="form-group">
+                            <label>목표가</label>
+                            <input type="number" id="targetPrice" placeholder="80000">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>투자 메모</label>
+                        <textarea id="stockMemo" placeholder="투자 이유, 전망 등..."></textarea>
+                    </div>
+                    <button onclick="addWatchlist()">➕ 종목 추가</button>
+                </div>
+            </div>
+
+            <!-- 포트폴리오 -->
+            <div id="portfolio" class="section">
+                <div class="card">
+                    <h2>💼 보유 포트폴리오</h2>
+                    <div id="portfolioItems"></div>
+                    
+                    <hr style="margin: 30px 0; border: none; border-top: 2px solid var(--light);">
+                    
+                    <h3 style="margin-bottom: 20px;">보유 종목 추가</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>종목명</label>
+                            <input type="text" id="portStockName" placeholder="삼성전자">
+                        </div>
+                        <div class="form-group">
+                            <label>수량</label>
+                            <input type="number" id="portQuantity" placeholder="10">
+                        </div>
+                        <div class="form-group">
+                            <label>평균 매수가</label>
+                            <input type="number" id="portBuyPrice" placeholder="65000">
+                        </div>
+                        <div class="form-group">
+                            <label>현재가</label>
+                            <input type="number" id="portCurrentPrice" placeholder="70000">
+                        </div>
+                    </div>
+                    <button onclick="addPortfolio()">➕ 종목 추가</button>
+                </div>
+            </div>
+
+            <!-- 매매 일지 -->
+            <div id="trades" class="section">
+                <div class="card">
+                    <h2>📈 매매 일지</h2>
+                    <div id="tradesList"></div>
+                    
+                    <hr style="margin: 30px 0; border: none; border-top: 2px solid var(--light);">
+                    
+                    <h3 style="margin-bottom: 20px;">매매 기록 추가</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>매매 유형</label>
+                            <select id="tradeType">
+                                <option value="buy">매수</option>
+                                <option value="sell">매도</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>종목명</label>
+                            <input type="text" id="tradeName" placeholder="삼성전자">
+                        </div>
+                        <div class="form-group">
+                            <label>수량</label>
+                            <input type="number" id="tradeQuantity" placeholder="10">
+                        </div>
+                        <div class="form-group">
+                            <label>가격</label>
+                            <input type="number" id="tradePrice" placeholder="70000">
+                        </div>
+                        <div class="form-group">
+                            <label>거래일</label>
+                            <input type="date" id="tradeDate">
+                        </div>
+                        <div class="form-group">
+                            <label>전략</label>
+                            <input type="text" id="tradeStrategy" placeholder="예: 단기 매매">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>메모</label>
+                        <textarea id="tradeMemo" placeholder="매매 이유, 시장 상황 등..."></textarea>
+                    </div>
+                    <button onclick="addTrade()">➕ 기록 추가</button>
+                </div>
+            </div>
+
+            <!-- 종목 분석 -->
+            <div id="analysis" class="section">
+                <div class="card">
+                    <h2>🔍 종목 분석</h2>
+                    <div id="analysisItems"></div>
+                    
+                    <hr style="margin: 30px 0; border: none; border-top: 2px solid var(--light);">
+                    
+                    <h3 style="margin-bottom: 20px;">종목 분석 추가</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>종목명</label>
+                            <input type="text" id="analysisName" placeholder="삼성전자">
+                        </div>
+                        <div class="form-group">
+                            <label>섹터</label>
+                            <input type="text" id="analysisSector" placeholder="반도체">
+                        </div>
+                    </div>
+                    
+                    <h4 style="margin: 20px 0 15px;">재무 지표</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>PER</label>
+                            <input type="number" step="0.1" id="analysisPer" placeholder="15.5">
+                        </div>
+                        <div class="form-group">
+                            <label>PBR</label>
+                            <input type="number" step="0.1" id="analysisPbr" placeholder="1.2">
+                        </div>
+                        <div class="form-group">
+                            <label>ROE (%)</label>
+                            <input type="number" step="0.1" id="analysisRoe" placeholder="12.5">
+                        </div>
+                        <div class="form-group">
+                            <label>부채비율 (%)</label>
+                            <input type="number" step="0.1" id="analysisDebt" placeholder="45">
+                        </div>
+                    </div>
+                    
+                    <h4 style="margin: 20px 0 15px;">투자 점수 (0-100)</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>재무 건전성</label>
+                            <input type="number" min="0" max="100" id="scoreFinancial" placeholder="80">
+                        </div>
+                        <div class="form-group">
+                            <label>성장성</label>
+                            <input type="number" min="0" max="100" id="scoreGrowth" placeholder="75">
+                        </div>
+                        <div class="form-group">
+                            <label>수익성</label>
+                            <input type="number" min="0" max="100" id="scoreProfitability" placeholder="85">
+                        </div>
+                        <div class="form-group">
+                            <label>밸류에이션</label>
+                            <input type="number" min="0" max="100" id="scoreValuation" placeholder="70">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>분석 내용</label>
+                        <textarea id="analysisContent" placeholder="강점, 약점, 전망 등을 작성하세요..."></textarea>
+                    </div>
+                    <button onclick="addAnalysis()">➕ 분석 추가</button>
+                </div>
+            </div>
+
+            <!-- 수익률 분석 -->
+            <div id="performance" class="section">
+                <div class="card">
+                    <h2>📉 수익률 분석</h2>
+                    
+                    <div class="grid grid-3">
+                        <div class="stat-card">
+                            <div class="stat-label">일간 수익률</div>
+                            <div class="stat-value" id="dailyReturn">0%</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">주간 수익률</div>
+                            <div class="stat-value" id="weeklyReturn">0%</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">월간 수익률</div>
+                            <div class="stat-value" id="monthlyReturn">0%</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 30px;">
+                        <h3 style="margin-bottom: 15px;">매매 통계</h3>
+                        <div class="grid grid-2">
+                            <div>
+                                <div class="score-item">
+                                    <span class="score-label">승률</span>
+                                    <div class="score-bar">
+                                        <div class="score-fill" id="winRateBar"></div>
+                                    </div>
+                                    <span class="score-value" id="winRate">0%</span>
+                                </div>
+                                <div class="score-item">
+                                    <span class="score-label">평균 수익</span>
+                                    <div class="score-bar">
+                                        <div class="score-fill" id="avgProfitBar"></div>
+                                    </div>
+                                    <span class="score-value" id="avgProfit">0%</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="item-meta">
+                                    <span>총 매매 횟수: <strong id="totalTrades">0회</strong></span>
+                                    <span>수익 거래: <strong id="winTrades">0회</strong></span>
+                                    <span>손실 거래: <strong id="lossTrades">0회</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 30px;">
+                        <h3 style="margin-bottom: 15px;">월별 손익</h3>
+                        <div class="chart-container">
+                            <canvas id="monthlyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 목표 관리 -->
+            <div id="goals" class="section">
+                <div class="card">
+                    <h2>🏆 투자 목표</h2>
+                    <div id="goalsList"></div>
+                    
+                    <hr style="margin: 30px 0; border: none; border-top: 2px solid var(--light);">
+                    
+                    <h3 style="margin-bottom: 20px;">새 목표 추가</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>목표 내용</label>
+                            <input type="text" id="goalTitle" placeholder="예: 1억 만들기">
+                        </div>
+                        <div class="form-group">
+                            <label>목표 금액</label>
+                            <input type="number" id="goalTarget" placeholder="100000000">
+                        </div>
+                        <div class="form-group">
+                            <label>현재 금액</label>
+                            <input type="number" id="goalCurrent" placeholder="50000000">
+                        </div>
+                        <div class="form-group">
+                            <label>목표일</label>
+                            <input type="date" id="goalDate">
+                        </div>
+                    </div>
+                    <button onclick="addGoal()">➕ 목표 추가</button>
+                </div>
+            </div>
+
+            <!-- 세금 계산 -->
+            <div id="tax" class="section">
+                <div class="card">
+                    <h2>💰 세금 계산기</h2>
+                    
+                    <h3 style="margin-bottom: 15px;">양도소득세 계산</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>매도가</label>
+                            <input type="number" id="sellPrice" placeholder="100000000">
+                        </div>
+                        <div class="form-group">
+                            <label>매수가</label>
+                            <input type="number" id="buyPrice" placeholder="80000000">
+                        </div>
+                        <div class="form-group">
+                            <label>보유 기간 (년)</label>
+                            <input type="number" id="holdingPeriod" placeholder="2">
+                        </div>
+                    </div>
+                    <button onclick="calculateCapitalGainTax()">💵 양도세 계산</button>
+                    <div id="taxResult" style="margin-top: 20px;"></div>
+
+                    <hr style="margin: 30px 0; border: none; border-top: 2px solid var(--light);">
+
+                    <h3 style="margin-bottom: 15px;">배당소득세 계산</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>배당금</label>
+                            <input type="number" id="dividend" placeholder="5000000">
+                        </div>
+                    </div>
+                    <button onclick="calculateDividendTax()">💵 배당세 계산</button>
+                    <div id="dividendTaxResult" style="margin-top: 20px;"></div>
+
+                    <hr style="margin: 30px 0; border: none; border-top: 2px solid var(--light);">
+
+                    <h3 style="margin-bottom: 15px;">연간 손익 정산</h3>
+                    <div id="yearlyTaxSummary"></div>
+                    <button onclick="calculateYearlyTax()">📊 연간 손익 계산</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 데이터 저장소
+        let appData = {
+            principles: [],
+            watchlist: [],
+            portfolio: [],
+            trades: [],
+            analysis: [],
+            goals: [],
+            memos: []
+        };
+
+        let portfolioChart = null;
+        let monthlyChart = null;
+
+        // 페이지 로드
+        window.addEventListener('load', () => {
+            loadData();
+            initCharts();
+            document.getElementById('tradeDate').valueAsDate = new Date();
+        });
+
+        // 섹션 전환
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 특정 섹션 진입 시 업데이트
+            if (sectionId === 'performance') updatePerformance();
+        }
+
+        // 데이터 로드
+        function loadData() {
+            const saved = localStorage.getItem('investmentDataComplete');
+            if (saved) {
+                appData = JSON.parse(saved);
+            } else {
+                // 초기 예시 데이터
+                appData = {
+                    principles: [
+                        {
+                            id: Date.now(),
+                            title: '손절 원칙',
+                            priority: 'high',
+                            content: '매수가 대비 -7% 하락 시 무조건 손절한다.'
+                        }
+                    ],
+                    watchlist: [
+                        {
+                            id: Date.now(),
+                            name: '삼성전자',
+                            code: '005930',
+                            price: 70000,
+                            targetPrice: 80000,
+                            memo: 'AI 반도체 수요 증가 기대'
+                        }
+                    ],
+                    portfolio: [],
+                    trades: [],
+                    analysis: [],
+                    goals: [],
+                    memos: []
+                };
+                saveData();
+            }
+            renderAll();
+        }
+
+        // 데이터 저장
+        function saveData() {
+            localStorage.setItem('investmentDataComplete', JSON.stringify(appData));
+        }
+
+        // 금액 포맷
+        function formatMoney(num) {
+            if (!num) return '0원';
+            if (num >= 100000000) return (num / 100000000).toFixed(1) + '억원';
+            if (num >= 10000) return (num / 10000).toFixed(0) + '만원';
+            return num.toLocaleString() + '원';
+        }
+
+        // 날짜 포맷
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        // 차트 초기화
+        function initCharts() {
+            // 포트폴리오 차트
+            const ctx1 = document.getElementById('portfolioChart');
+            if (ctx1) {
+                portfolioChart = new Chart(ctx1, {
+                    type: 'line',
+                    data: {
+                        labels: ['1월', '2월', '3월', '4월', '5월', '6월'],
+                        datasets: [{
+                            label: '포트폴리오 가치',
+                            data: [5000, 5200, 5400, 5300, 5600, 5800],
+                            borderColor: 'rgb(37, 99, 235)',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+
+            // 월별 차트
+            const ctx2 = document.getElementById('monthlyChart');
+            if (ctx2) {
+                monthlyChart = new Chart(ctx2, {
+                    type: 'bar',
+                    data: {
+                        labels: ['1월', '2월', '3월', '4월', '5월', '6월'],
+                        datasets: [{
+                            label: '월별 손익',
+                            data: [200, -100, 300, 150, 400, 250],
+                            backgroundColor: function(context) {
+                                const value = context.parsed.y;
+                                return value >= 0 ? 'rgba(239, 68, 68, 0.8)' : 'rgba(37, 99, 235, 0.8)';
+                            }
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+        }
+
+        // =================
+        // 투자 원칙
+        // =================
+        function renderPrinciples() {
+            const container = document.getElementById('principlesList');
+            if (!container) return;
+
+            if (appData.principles.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">📜</div><p>등록된 투자 원칙이 없습니다.</p></div>';
+                return;
+            }
+
+            container.innerHTML = appData.principles.map(p => `
+                <div class="item-card">
+                    <div class="item-header">
+                        <span class="item-title">${p.title}</span>
+                        <span class="badge badge-${p.priority}">${
+                            p.priority === 'high' ? '높음' : 
+                            p.priority === 'medium' ? '보통' : '낮음'
+                        }</span>
+                    </div>
+                    <div class="item-content">${p.content}</div>
+                    <button class="btn-danger btn-sm" onclick="deletePrinciple(${p.id})">🗑️ 삭제</button>
+                </div>
+            `).join('');
+
+            // 오늘의 원칙
+            const today = document.getElementById('todayPrinciple');
+            if (today && appData.principles.length > 0) {
+                const random = appData.principles[Math.floor(Math.random() * appData.principles.length)];
+                today.innerHTML = `
+                    <div class="item-card">
+                        <div class="item-title">${random.title}</div>
+                        <div class="item-content">${random.content}</div>
+                    </div>
+                `;
+            }
+        }
+
+        function addPrinciple() {
+            const title = document.getElementById('principleTitle').value.trim();
+            const priority = document.getElementById('principlePriority').value;
+            const content = document.getElementById('principleContent').value.trim();
+
+            if (!title || !content) {
+                alert('제목과 내용을 입력하세요!');
+                return;
+            }
+
+            appData.principles.push({
+                id: Date.now(),
+                title, priority, content
+            });
+
+            document.getElementById('principleTitle').value = '';
+            document.getElementById('principleContent').value = '';
+
+            saveData();
+            renderPrinciples();
+        }
+
+        function deletePrinciple(id) {
+            if (!confirm('삭제하시겠습니까?')) return;
+            appData.principles = appData.principles.filter(p => p.id !== id);
+            saveData();
+            renderPrinciples();
+        }
+
+        // =================
+        // 관심 종목
+        // =================
+        function renderWatchlist() {
+            const container = document.getElementById('watchlistItems');
+            if (!container) return;
+
+            if (appData.watchlist.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">👀</div><p>관심 종목이 없습니다.</p></div>';
+                return;
+            }
+
+            container.innerHTML = appData.watchlist.map(s => {
+                const change = ((s.targetPrice - s.price) / s.price * 100).toFixed(2);
+                return `
+                    <div class="item-card">
+                        <div class="item-header">
+                            <div>
+                                <span class="item-title">${s.name}</span>
+                                ${s.code ? `<span style="color: var(--gray); margin-left: 10px;">${s.code}</span>` : ''}
+                            </div>
+                            <span class="price-up" style="font-size: 20px; font-weight: bold;">
+                                ${s.price.toLocaleString()}원
+                            </span>
+                        </div>
+                        <div class="item-meta">
+                            <span>목표가: ${s.targetPrice.toLocaleString()}원</span>
+                            <span style="color: ${change > 0 ? 'var(--danger)' : 'var(--primary)'}">
+                                기대수익: ${change}%
+                            </span>
+                        </div>
+                        ${s.memo ? `<div class="item-content">${s.memo}</div>` : ''}
+                        <button class="btn-danger btn-sm" onclick="deleteWatchlist(${s.id})">🗑️ 삭제</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addWatchlist() {
+            const name = document.getElementById('stockName').value.trim();
+            const code = document.getElementById('stockCode').value.trim();
+            const price = parseFloat(document.getElementById('stockPrice').value);
+            const targetPrice = parseFloat(document.getElementById('targetPrice').value);
+            const memo = document.getElementById('stockMemo').value.trim();
+
+            if (!name || !price || !targetPrice) {
+                alert('종목명, 현재가, 목표가는 필수입니다!');
+                return;
+            }
+
+            appData.watchlist.push({
+                id: Date.now(),
+                name, code, price, targetPrice, memo
+            });
+
+            document.getElementById('stockName').value = '';
+            document.getElementById('stockCode').value = '';
+            document.getElementById('stockPrice').value = '';
+            document.getElementById('targetPrice').value = '';
+            document.getElementById('stockMemo').value = '';
+
+            saveData();
+            renderWatchlist();
+            updateDashboard();
+        }
+
+        function deleteWatchlist(id) {
+            if (!confirm('삭제하시겠습니까?')) return;
+            appData.watchlist = appData.watchlist.filter(s => s.id !== id);
+            saveData();
+            renderWatchlist();
+            updateDashboard();
+        }
+
+        // =================
+        // 포트폴리오
+        // =================
+        function renderPortfolio() {
+            const container = document.getElementById('portfolioItems');
+            if (!container) return;
+
+            if (appData.portfolio.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">💼</div><p>보유 종목이 없습니다.</p></div>';
+                return;
+            }
+
+            let totalValue = 0;
+            let totalCost = 0;
+
+            const html = appData.portfolio.map(p => {
+                const value = p.currentPrice * p.quantity;
+                const cost = p.buyPrice * p.quantity;
+                const profit = value - cost;
+                const profitRate = ((profit / cost) * 100).toFixed(2);
+
+                totalValue += value;
+                totalCost += cost;
+
+                return `
+                    <div class="item-card">
+                        <div class="item-header">
+                            <span class="item-title">${p.name}</span>
+                            <span class="${profit >= 0 ? 'price-up' : 'price-down'}" style="font-size: 20px; font-weight: bold;">
+                                ${p.currentPrice.toLocaleString()}원
+                            </span>
+                        </div>
+                        <div class="item-meta">
+                            <span>보유: ${p.quantity}주</span>
+                            <span>평균가: ${p.buyPrice.toLocaleString()}원</span>
+                            <span>평가액: ${value.toLocaleString()}원</span>
+                        </div>
+                        <div style="margin: 10px 0; padding: 10px; background: ${profit >= 0 ? '#fee2e2' : '#dbeafe'}; border-radius: 8px;">
+                            <strong style="color: ${profit >= 0 ? 'var(--danger)' : 'var(--primary)'}; font-size: 16px;">
+                                ${profit >= 0 ? '+' : ''}${profit.toLocaleString()}원 (${profitRate}%)
+                            </strong>
+                        </div>
+                        <button class="btn-danger btn-sm" onclick="deletePortfolio(${p.id})">🗑️ 삭제</button>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = html;
+
+            // 대시보드 업데이트
+            updateDashboard();
+        }
+
+        function addPortfolio() {
+            const name = document.getElementById('portStockName').value.trim();
+            const quantity = parseInt(document.getElementById('portQuantity').value);
+            const buyPrice = parseFloat(document.getElementById('portBuyPrice').value);
+            const currentPrice = parseFloat(document.getElementById('portCurrentPrice').value);
+
+            if (!name || !quantity || !buyPrice || !currentPrice) {
+                alert('모든 필드를 입력하세요!');
+                return;
+            }
+
+            appData.portfolio.push({
+                id: Date.now(),
+                name, quantity, buyPrice, currentPrice
+            });
+
+            document.getElementById('portStockName').value = '';
+            document.getElementById('portQuantity').value = '';
+            document.getElementById('portBuyPrice').value = '';
+            document.getElementById('portCurrentPrice').value = '';
+
+            saveData();
+            renderPortfolio();
+        }
+
+        function deletePortfolio(id) {
+            if (!confirm('삭제하시겠습니까?')) return;
+            appData.portfolio = appData.portfolio.filter(p => p.id !== id);
+            saveData();
+            renderPortfolio();
+        }
+
+        // =================
+        // 매매 일지
+        // =================
+        function renderTrades() {
+            const container = document.getElementById('tradesList');
+            if (!container) return;
+
+            if (appData.trades.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">📈</div><p>매매 기록이 없습니다.</p></div>';
+                return;
+            }
+
+            container.innerHTML = appData.trades.map(t => {
+                const amount = t.price * t.quantity;
+                return `
+                    <div class="item-card">
+                        <div class="item-header">
+                            <div>
+                                <span class="badge ${t.type === 'buy' ? 'badge-danger' : 'badge-success'}">
+                                    ${t.type === 'buy' ? '매수' : '매도'}
+                                </span>
+                                <strong style="margin-left: 10px; font-size: 18px;">${t.name}</strong>
+                            </div>
+                            <span style="color: var(--gray); font-size: 14px;">${formatDate(t.date)}</span>
+                        </div>
+                        <div class="item-meta">
+                            <span>${t.quantity}주 @ ${t.price.toLocaleString()}원</span>
+                            <span>총액: ${amount.toLocaleString()}원</span>
+                            ${t.strategy ? `<span>전략: ${t.strategy}</span>` : ''}
+                        </div>
+                        ${t.memo ? `<div class="item-content">${t.memo}</div>` : ''}
+                        <button class="btn-danger btn-sm" onclick="deleteTrade(${t.id})">🗑️ 삭제</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addTrade() {
+            const type = document.getElementById('tradeType').value;
+            const name = document.getElementById('tradeName').value.trim();
+            const quantity = parseInt(document.getElementById('tradeQuantity').value);
+            const price = parseFloat(document.getElementById('tradePrice').value);
+            const date = document.getElementById('tradeDate').value;
+            const strategy = document.getElementById('tradeStrategy').value.trim();
+            const memo = document.getElementById('tradeMemo').value.trim();
+
+            if (!name || !quantity || !price || !date) {
+                alert('필수 항목을 입력하세요!');
+                return;
+            }
+
+            appData.trades.unshift({
+                id: Date.now(),
+                type, name, quantity, price, date, strategy, memo
+            });
+
+            document.getElementById('tradeName').value = '';
+            document.getElementById('tradeQuantity').value = '';
+            document.getElementById('tradePrice').value = '';
+            document.getElementById('tradeStrategy').value = '';
+            document.getElementById('tradeMemo').value = '';
+
+            saveData();
+            renderTrades();
+            updateDashboard();
+        }
+
+        function deleteTrade(id) {
+            if (!confirm('삭제하시겠습니까?')) return;
+            appData.trades = appData.trades.filter(t => t.id !== id);
+            saveData();
+            renderTrades();
+            updateDashboard();
+        }
+
+        // =================
+        // 종목 분석
+        // =================
+        function renderAnalysis() {
+            const container = document.getElementById('analysisItems');
+            if (!container) return;
+
+            if (appData.analysis.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><p>분석 자료가 없습니다.</p></div>';
+                return;
+            }
+
+            container.innerHTML = appData.analysis.map(a => {
+                const avgScore = ((a.scoreFinancial + a.scoreGrowth + a.scoreProfitability + a.scoreValuation) / 4).toFixed(1);
+                
+                return `
+                    <div class="item-card">
+                        <div class="item-header">
+                            <div>
+                                <span class="item-title">${a.name}</span>
+                                ${a.sector ? `<span class="badge badge-info" style="margin-left: 10px;">${a.sector}</span>` : ''}
+                            </div>
+                            <span style="font-size: 24px; font-weight: bold; color: var(--primary);">
+                                ${avgScore}점
+                            </span>
+                        </div>
+
+                        <div style="margin: 15px 0;">
+                            <h4 style="margin-bottom: 10px; font-size: 14px;">재무 지표</h4>
+                            <div class="item-meta">
+                                <span>PER: ${a.per || '-'}</span>
+                                <span>PBR: ${a.pbr || '-'}</span>
+                                <span>ROE: ${a.roe || '-'}%</span>
+                                <span>부채비율: ${a.debt || '-'}%</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 style="margin-bottom: 10px; font-size: 14px;">투자 점수</h4>
+                            <div class="score-item">
+                                <span class="score-label">재무 건전성</span>
+                                <div class="score-bar">
+                                    <div class="score-fill" style="width: ${a.scoreFinancial}%"></div>
+                                </div>
+                                <span class="score-value">${a.scoreFinancial}</span>
+                            </div>
+                            <div class="score-item">
+                                <span class="score-label">성장성</span>
+                                <div class="score-bar">
+                                    <div class="score-fill" style="width: ${a.scoreGrowth}%"></div>
+                                </div>
+                                <span class="score-value">${a.scoreGrowth}</span>
+                            </div>
+                            <div class="score-item">
+                                <span class="score-label">수익성</span>
+                                <div class="score-bar">
+                                    <div class="score-fill" style="width: ${a.scoreProfitability}%"></div>
+                                </div>
+                                <span class="score-value">${a.scoreProfitability}</span>
+                            </div>
+                            <div class="score-item">
+                                <span class="score-label">밸류에이션</span>
+                                <div class="score-bar">
+                                    <div class="score-fill" style="width: ${a.scoreValuation}%"></div>
+                                </div>
+                                <span class="score-value">${a.scoreValuation}</span>
+                            </div>
+                        </div>
+
+                        ${a.content ? `<div class="item-content" style="margin-top: 15px;">${a.content}</div>` : ''}
+                        
+                        <button class="btn-danger btn-sm" onclick="deleteAnalysis(${a.id})">🗑️ 삭제</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addAnalysis() {
+            const name = document.getElementById('analysisName').value.trim();
+            const sector = document.getElementById('analysisSector').value.trim();
+            const per = parseFloat(document.getElementById('analysisPer').value) || null;
+            const pbr = parseFloat(document.getElementById('analysisPbr').value) || null;
+            const roe = parseFloat(document.getElementById('analysisRoe').value) || null;
+            const debt = parseFloat(document.getElementById('analysisDebt').value) || null;
+            const scoreFinancial = parseInt(document.getElementById('scoreFinancial').value) || 0;
+            const scoreGrowth = parseInt(document.getElementById('scoreGrowth').value) || 0;
+            const scoreProfitability = parseInt(document.getElementById('scoreProfitability').value) || 0;
+            const scoreValuation = parseInt(document.getElementById('scoreValuation').value) || 0;
+            const content = document.getElementById('analysisContent').value.trim();
+
+            if (!name) {
+                alert('종목명을 입력하세요!');
+                return;
+            }
+
+            appData.analysis.push({
+                id: Date.now(),
+                name, sector, per, pbr, roe, debt,
+                scoreFinancial, scoreGrowth, scoreProfitability, scoreValuation,
+                content
+            });
+
+            // 폼 초기화
+            document.getElementById('analysisName').value = '';
+            document.getElementById('analysisSector').value = '';
+            document.getElementById('analysisPer').value = '';
+            document.getElementById('analysisPbr').value = '';
+            document.getElementById('analysisRoe').value = '';
+            document.getElementById('analysisDebt').value = '';
+            document.getElementById('scoreFinancial').value = '';
+            document.getElementById('scoreGrowth').value = '';
+            document.getElementById('scoreProfitability').value = '';
+            document.getElementById('scoreValuation').value = '';
+            document.getElementById('analysisContent').value = '';
+
+            saveData();
+            renderAnalysis();
+        }
+
+        function deleteAnalysis(id) {
+            if (!confirm('삭제하시겠습니까?')) return;
+            appData.analysis = appData.analysis.filter(a => a.id !== id);
+            saveData();
+            renderAnalysis();
+        }
+
+        // =================
+        // 목표 관리
+        // =================
+        function renderGoals() {
+            const container = document.getElementById('goalsList');
+            if (!container) return;
+
+            if (appData.goals.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">🏆</div><p>투자 목표가 없습니다.</p></div>';
+                return;
+            }
+
+            container.innerHTML = appData.goals.map(g => {
+                const progress = (g.current / g.target * 100).toFixed(1);
+                const remaining = g.target - g.current;
+                const daysLeft = Math.ceil((new Date(g.targetDate) - new Date()) / (1000 * 60 * 60 * 24));
+
+                return `
+                    <div class="item-card">
+                        <div class="item-header">
+                            <span class="item-title">${g.title}</span>
+                            <span class="badge badge-info">D-${daysLeft > 0 ? daysLeft : 0}</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: ${progress}%">
+                                ${progress}%
+                            </div>
+                        </div>
+                        <div class="item-meta" style="margin-top: 10px;">
+                            <span>현재: ${formatMoney(g.current)}</span>
+                            <span>목표: ${formatMoney(g.target)}</span>
+                            <span>남은 금액: ${formatMoney(remaining)}</span>
+                        </div>
+                        <div style="margin-top: 10px; font-size: 13px; color: var(--gray);">
+                            목표일: ${formatDate(g.targetDate)}
+                        </div>
+                        <button class="btn-danger btn-sm" style="margin-top: 10px;" onclick="deleteGoal(${g.id})">🗑️ 삭제</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addGoal() {
+            const title = document.getElementById('goalTitle').value.trim();
+            const target = parseFloat(document.getElementById('goalTarget').value);
+            const current = parseFloat(document.getElementById('goalCurrent').value);
+            const targetDate = document.getElementById('goalDate').value;
+
+            if (!title || !target || !current || !targetDate) {
+                alert('모든 필드를 입력하세요!');
+                return;
+            }
+
+            appData.goals.push({
+                id: Date.now(),
+                title, target, current, targetDate
+            });
+
+            document.getElementById('goalTitle').value = '';
+            document.getElementById('goalTarget').value = '';
+            document.getElementById('goalCurrent').value = '';
+            document.getElementById('goalDate').value = '';
+
+            saveData();
+            renderGoals();
+        }
+
+        function deleteGoal(id) {
+            if (!confirm('삭제하시겠습니까?')) return;
+            appData.goals = appData.goals.filter(g => g.id !== id);
+            saveData();
+            renderGoals();
+        }
+
+        // =================
+        // 수익률 분석
+        // =================
+        function updatePerformance() {
+            // 매매 통계 계산
+            const trades = appData.trades;
+            if (trades.length === 0) {
+                document.getElementById('winRate').textContent = '0%';
+                document.getElementById('avgProfit').textContent = '0%';
+                document.getElementById('totalTrades').textContent = '0회';
+                document.getElementById('winTrades').textContent = '0회';
+                document.getElementById('lossTrades').textContent = '0회';
+                return;
+            }
+
+            // 간단한 승률 계산 (실제로는 매수/매도 쌍을 매칭해야 함)
+            const totalTrades = trades.length;
+            const winTrades = Math.floor(totalTrades * 0.6); // 예시
+            const lossTrades = totalTrades - winTrades;
+            const winRate = (winTrades / totalTrades * 100).toFixed(1);
+
+            document.getElementById('totalTrades').textContent = totalTrades + '회';
+            document.getElementById('winTrades').textContent = winTrades + '회';
+            document.getElementById('lossTrades').textContent = lossTrades + '회';
+            document.getElementById('winRate').textContent = winRate + '%';
+            document.getElementById('winRateBar').style.width = winRate + '%';
+            
+            document.getElementById('avgProfit').textContent = '5.2%'; // 예시
+            document.getElementById('avgProfitBar').style.width = '52%';
+        }
+
+        // =================
+        // 세금 계산
+        // =================
+        function calculateCapitalGainTax() {
+            const sellPrice = parseFloat(document.getElementById('sellPrice').value);
+            const buyPrice = parseFloat(document.getElementById('buyPrice').value);
+            const holdingPeriod = parseFloat(document.getElementById('holdingPeriod').value);
+
+            if (!sellPrice || !buyPrice || !holdingPeriod) {
+                alert('모든 값을 입력하세요!');
+                return;
+            }
+
+            const profit = sellPrice - buyPrice;
+            const taxRate = holdingPeriod >= 1 ? 0.22 : 0.33; // 단기/장기
+            const tax = profit * taxRate;
+            const netProfit = profit - tax;
+
+            const result = document.getElementById('taxResult');
+            result.innerHTML = `
+                <div class="item-card">
+                    <h4 style="margin-bottom: 15px;">양도소득세 계산 결과</h4>
+                    <div class="item-meta">
+                        <span>양도 차익: <strong>${formatMoney(profit)}</strong></span>
+                        <span>세율: <strong>${(taxRate * 100).toFixed(0)}%</strong> (${holdingPeriod >= 1 ? '장기' : '단기'})</span>
+                    </div>
+                    <div style="margin: 15px 0; padding: 15px; background: var(--light); border-radius: 8px;">
+                        <div style="font-size: 14px; color: var(--gray); margin-bottom: 5px;">납부 세액</div>
+                        <div style="font-size: 24px; font-weight: bold; color: var(--danger);">
+                            ${formatMoney(tax)}
+                        </div>
+                    </div>
+                    <div style="margin: 15px 0; padding: 15px; background: #d1fae5; border-radius: 8px;">
+                        <div style="font-size: 14px; color: var(--gray); margin-bottom: 5px;">세후 순이익</div>
+                        <div style="font-size: 24px; font-weight: bold; color: var(--success);">
+                            ${formatMoney(netProfit)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function calculateDividendTax() {
+            const dividend = parseFloat(document.getElementById('dividend').value);
+
+            if (!dividend) {
+                alert('배당금을 입력하세요!');
+                return;
+            }
+
+            const taxRate = 0.154; // 15.4% (소득세 14% + 지방세 1.4%)
+            const tax = dividend * taxRate;
+            const netDividend = dividend - tax;
+
+            const result = document.getElementById('dividendTaxResult');
+            result.innerHTML = `
+                <div class="item-card">
+                    <h4 style="margin-bottom: 15px;">배당소득세 계산 결과</h4>
+                    <div class="item-meta">
+                        <span>배당금: <strong>${formatMoney(dividend)}</strong></span>
+                        <span>세율: <strong>15.4%</strong></span>
+                    </div>
+                    <div style="margin: 15px 0; padding: 15px; background: var(--light); border-radius: 8px;">
+                        <div style="font-size: 14px; color: var(--gray); margin-bottom: 5px;">원천징수 세액</div>
+                        <div style="font-size: 24px; font-weight: bold; color: var(--danger);">
+                            ${formatMoney(tax)}
+                        </div>
+                    </div>
+                    <div style="margin: 15px 0; padding: 15px; background: #d1fae5; border-radius: 8px;">
+                        <div style="font-size: 14px; color: var(--gray); margin-bottom: 5px;">세후 수령액</div>
+                        <div style="font-size: 24px; font-weight: bold; color: var(--success);">
+                            ${formatMoney(netDividend)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function calculateYearlyTax() {
+            const summary = document.getElementById('yearlyTaxSummary');
+            
+            // 간단한 예시 (실제로는 매매 기록 기반 계산)
+            const totalProfit = 10000000;
+            const totalLoss = 3000000;
+            const netProfit = totalProfit - totalLoss;
+            const estimatedTax = netProfit * 0.22;
+
+            summary.innerHTML = `
+                <div class="item-card">
+                    <h4 style="margin-bottom: 15px;">연간 손익 정산 (${new Date().getFullYear()}년)</h4>
+                    <div class="item-meta">
+                        <span>총 수익: <strong class="price-up">+${formatMoney(totalProfit)}</strong></span>
+                        <span>총 손실: <strong class="price-down">-${formatMoney(totalLoss)}</strong></span>
+                        <span>순손익: <strong>${formatMoney(netProfit)}</strong></span>
+                    </div>
+                    <div style="margin: 15px 0; padding: 15px; background: #fef3c7; border-radius: 8px;">
+                        <div style="font-size: 14px; color: var(--gray); margin-bottom: 5px;">예상 세금</div>
+                        <div style="font-size: 24px; font-weight: bold; color: var(--warning);">
+                            약 ${formatMoney(estimatedTax)}
+                        </div>
+                        <div style="font-size: 12px; color: var(--gray); margin-top: 5px;">
+                            * 실제 세액은 보유 기간, 공제 항목 등에 따라 달라질 수 있습니다.
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // =================
+        // 대시보드 업데이트
+        // =================
+        function updateDashboard() {
+            // 포트폴리오 통계
+            let totalValue = 0;
+            let totalCost = 0;
+
+            appData.portfolio.forEach(p => {
+                totalValue += p.currentPrice * p.quantity;
+                totalCost += p.buyPrice * p.quantity;
+            });
+
+            const totalProfit = totalValue - totalCost;
+            const totalReturn = totalCost > 0 ? ((totalProfit / totalCost) * 100).toFixed(2) : 0;
+
+            document.getElementById('totalAssets').textContent = formatMoney(totalValue);
+            document.getElementById('totalReturn').textContent = totalReturn + '%';
+            document.getElementById('returnAmount').textContent = (totalProfit >= 0 ? '+' : '') + formatMoney(totalProfit);
+            document.getElementById('stockCount').textContent = appData.portfolio.length + '개';
+
+            // 이번 달 매매
+            const thisMonth = new Date().getMonth();
+            const monthTrades = appData.trades.filter(t => new Date(t.date).getMonth() === thisMonth);
+            document.getElementById('monthTrades').textContent = monthTrades.length + '회';
+        }
+
+        // =================
+        // 빠른 메모
+        // =================
+        function saveQuickMemo() {
+            const memo = document.getElementById('quickMemo').value.trim();
+            if (!memo) {
+                alert('메모를 입력하세요!');
+                return;
+            }
+
+            appData.memos.push({
+                id: Date.now(),
+                content: memo,
+                date: new Date().toISOString()
+            });
+
+            document.getElementById('quickMemo').value = '';
+            saveData();
+            alert('메모가 저장되었습니다!');
+        }
+
+        // =================
+        // 데이터 관리
+        // =================
+        function exportData() {
+            const dataStr = JSON.stringify(appData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `investment-data-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (confirm('기존 데이터를 모두 덮어쓰시겠습니까?')) {
+                        appData = imported;
+                        saveData();
+                        renderAll();
+                        alert('데이터를 불러왔습니다!');
+                    }
+                } catch (error) {
+                    alert('파일 형식이 잘못되었습니다!');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // =================
+        // 전체 렌더링
+        // =================
+        function renderAll() {
+            renderPrinciples();
+            renderWatchlist();
+            renderPortfolio();
+            renderTrades();
+            renderAnalysis();
+            renderGoals();
+            updateDashboard();
+            updatePerformance();
+        }
+    </script>
+</body>
+</html>

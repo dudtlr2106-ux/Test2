@@ -458,10 +458,12 @@
                 <button class="nav-tab" onclick="showSection('portfolio')">💼 포트폴리오</button>
                 <button class="nav-tab" onclick="showSection('trades')">📈 매매 일지</button>
                 <button class="nav-tab" onclick="showSection('analysis')">🔍 종목 분석</button>
+                <button class="nav-tab" onclick="showSection('screener')">🎯 종목 스크리너</button>
                 <button class="nav-tab" onclick="showSection('performance')">📉 수익률</button>
                 <button class="nav-tab" onclick="showSection('goals')">🏆 목표</button>
                 <button class="nav-tab" onclick="showSection('tax')">💰 세금</button>
                 <button class="nav-tab" onclick="showSection('mindset')">🧠 마인드 컨트롤</button>
+                <button class="nav-tab" onclick="showSection('account')">⚙️ 계정 관리</button>
             </div>
         </header>
 
@@ -760,6 +762,160 @@
                 </div>
             </div>
 
+            <!-- 종목 스크리너 -->
+            <div id="screener" class="section">
+                <div class="card">
+                    <h2>🎯 AI 종목 스크리너</h2>
+                    <p style="color: var(--gray); margin-bottom: 20px;">
+                        원하는 조건을 입력하면 AI가 자동으로 종목을 찾아드립니다
+                    </p>
+
+                    <!-- 간단 검색 -->
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                        padding: 30px; border-radius: 15px; margin-bottom: 30px;">
+                        <h3 style="color: white; margin-bottom: 15px; font-size: 18px;">💬 자연어로 검색</h3>
+                        <input type="text" id="naturalSearch" placeholder="예: 수익률 20% 이상인 기업 찾아줘" 
+                            style="width: 100%; padding: 15px; font-size: 16px; border: none; border-radius: 10px;
+                            box-shadow: 0 4px 15px rgba(0,0,0,0.1);"
+                            onkeypress="if(event.key==='Enter') searchByNaturalLanguage()">
+                        <button onclick="searchByNaturalLanguage()" 
+                            style="width: 100%; margin-top: 15px; background: white; color: var(--primary); 
+                            box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                            🔍 AI로 찾기
+                        </button>
+                    </div>
+
+                    <!-- 상세 필터 -->
+                    <div class="grid grid-2">
+                        <div class="card" style="background: var(--light);">
+                            <h3 style="margin-bottom: 20px; font-size: 16px;">📊 시장 선택</h3>
+                            <div class="form-group">
+                                <label>거래소</label>
+                                <select id="marketSelect">
+                                    <option value="kospi">🇰🇷 코스피 (KOSPI)</option>
+                                    <option value="kosdaq">🇰🇷 코스닥 (KOSDAQ)</option>
+                                    <option value="nasdaq">🇺🇸 나스닥 (NASDAQ)</option>
+                                    <option value="nyse">🇺🇸 뉴욕증권거래소 (NYSE)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="card" style="background: var(--light);">
+                            <h3 style="margin-bottom: 20px; font-size: 16px;">💰 수익률 조건</h3>
+                            <div class="form-group">
+                                <label>수익률 (최소)</label>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <input type="range" id="returnMin" min="-50" max="200" value="0" 
+                                        oninput="updateReturnDisplay()" style="flex: 1;">
+                                    <span id="returnMinDisplay" style="font-weight: bold; min-width: 60px;">0%</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>기간</label>
+                                <select id="returnPeriod">
+                                    <option value="1d">1일</option>
+                                    <option value="1w">1주일</option>
+                                    <option value="1m">1개월</option>
+                                    <option value="3m">3개월</option>
+                                    <option value="6m">6개월</option>
+                                    <option value="1y" selected>1년</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-3" style="margin-top: 20px;">
+                        <div class="card" style="background: var(--light);">
+                            <h3 style="margin-bottom: 15px; font-size: 16px;">📈 밸류에이션</h3>
+                            <div class="form-group">
+                                <label>PER (최대)</label>
+                                <input type="number" id="perMax" placeholder="예: 15" step="0.1">
+                            </div>
+                            <div class="form-group">
+                                <label>PBR (최대)</label>
+                                <input type="number" id="pbrMax" placeholder="예: 2" step="0.1">
+                            </div>
+                        </div>
+
+                        <div class="card" style="background: var(--light);">
+                            <h3 style="margin-bottom: 15px; font-size: 16px;">💪 재무 건전성</h3>
+                            <div class="form-group">
+                                <label>ROE (최소, %)</label>
+                                <input type="number" id="roeMin" placeholder="예: 10" step="0.1">
+                            </div>
+                            <div class="form-group">
+                                <label>부채비율 (최대, %)</label>
+                                <input type="number" id="debtMax" placeholder="예: 100" step="0.1">
+                            </div>
+                        </div>
+
+                        <div class="card" style="background: var(--light);">
+                            <h3 style="margin-bottom: 15px; font-size: 16px;">🏢 기업 규모</h3>
+                            <div class="form-group">
+                                <label>시가총액 (최소)</label>
+                                <select id="marketCapMin">
+                                    <option value="0">제한 없음</option>
+                                    <option value="100">100억 이상</option>
+                                    <option value="1000">1천억 이상</option>
+                                    <option value="10000">1조 이상</option>
+                                    <option value="100000">10조 이상</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>거래량 (최소)</label>
+                                <select id="volumeMin">
+                                    <option value="0">제한 없음</option>
+                                    <option value="10000">1만주 이상</option>
+                                    <option value="100000">10만주 이상</option>
+                                    <option value="1000000">100만주 이상</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 30px; text-align: center;">
+                        <button onclick="screenStocks()" style="padding: 18px 50px; font-size: 18px;">
+                            🎯 조건에 맞는 종목 찾기
+                        </button>
+                    </div>
+
+                    <div id="screenerLoading" style="display: none; text-align: center; padding: 40px;">
+                        <div class="spinner"></div>
+                        <p style="margin-top: 20px; color: var(--gray);">종목을 검색하고 있습니다...</p>
+                    </div>
+
+                    <div id="screenerResults" style="margin-top: 30px;"></div>
+                </div>
+
+                <!-- 프리셋 -->
+                <div class="card">
+                    <h2>⚡ 빠른 스크리닝 프리셋</h2>
+                    <div class="grid grid-3">
+                        <button class="btn-success" onclick="applyPreset('growth')" style="padding: 20px;">
+                            <div style="font-size: 24px; margin-bottom: 10px;">🚀</div>
+                            <strong>고성장주</strong>
+                            <div style="font-size: 12px; margin-top: 5px; opacity: 0.9;">
+                                수익률 30%↑<br>ROE 15%↑
+                            </div>
+                        </button>
+                        <button class="btn-primary" onclick="applyPreset('value')" style="padding: 20px;">
+                            <div style="font-size: 24px; margin-bottom: 10px;">💎</div>
+                            <strong>가치주</strong>
+                            <div style="font-size: 12px; margin-top: 5px; opacity: 0.9;">
+                                PER 10↓<br>PBR 1↓
+                            </div>
+                        </button>
+                        <button class="btn-warning" onclick="applyPreset('safe')" style="padding: 20px;">
+                            <div style="font-size: 24px; margin-bottom: 10px;">🛡️</div>
+                            <strong>안전주</strong>
+                            <div style="font-size: 12px; margin-top: 5px; opacity: 0.9;">
+                                부채비율 50%↓<br>ROE 10%↑
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- 수익률 분석 -->
             <div id="performance" class="section">
                 <div class="card">
@@ -1049,6 +1205,332 @@
                     <div class="chart-container">
                         <canvas id="mindsetChart"></canvas>
                     </div>
+                </div>
+            </div>
+
+            <!-- 계정 관리 -->
+            <div id="account" class="section">
+                <div class="grid grid-2">
+                    <!-- 계정 정보 -->
+                    <div class="card">
+                        <h2>👤 계정 정보</h2>
+                        <div style="background: var(--light); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                                <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                    border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+                                    font-size: 28px; color: white;">
+                                    👤
+                                </div>
+                                <div>
+                                    <div style="font-size: 20px; font-weight: bold; color: var(--dark);" id="accountUsername"></div>
+                                    <div style="font-size: 13px; color: var(--gray); margin-top: 3px;">투자 관리 시스템 사용자</div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px;">
+                                <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
+                                    <div style="font-size: 11px; color: var(--gray);">가입일</div>
+                                    <div style="font-weight: bold; font-size: 13px;" id="accountCreated"></div>
+                                </div>
+                                <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
+                                    <div style="font-size: 11px; color: var(--gray);">마지막 접속</div>
+                                    <div style="font-weight: bold; font-size: 13px;" id="accountLastLogin">방금 전</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 style="margin: 20px 0 15px; font-size: 16px;">비밀번호 변경</h3>
+                        <div class="form-group">
+                            <label>현재 비밀번호</label>
+                            <input type="password" id="currentPassword" placeholder="현재 비밀번호">
+                        </div>
+                        <div class="form-group">
+                            <label>새 비밀번호</label>
+                            <input type="password" id="newPassword" placeholder="새 비밀번호 (6자 이상)">
+                        </div>
+                        <div class="form-group">
+                            <label>새 비밀번호 확인</label>
+                            <input type="password" id="newPasswordConfirm" placeholder="새 비밀번호 확인">
+                        </div>
+                        <button onclick="changePassword()">🔒 비밀번호 변경</button>
+                        <div id="passwordChangeResult" style="margin-top: 10px;"></div>
+                    </div>
+
+                    <!-- 데이터 관리 -->
+                    <div class="card">
+                        <h2>💾 데이터 관리</h2>
+                        
+                        <div style="background: #d1fae5; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: bold; color: var(--dark); margin-bottom: 5px;">
+                                        총 데이터 항목
+                                    </div>
+                                    <div style="font-size: 24px; font-weight: bold; color: var(--success);" id="totalDataCount">0개</div>
+                                </div>
+                                <div style="font-size: 48px;">📊</div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
+                            <div style="text-align: center; padding: 12px; background: var(--light); border-radius: 8px;">
+                                <div style="font-size: 11px; color: var(--gray);">투자 원칙</div>
+                                <div style="font-weight: bold; font-size: 16px;" id="principlesCount">0</div>
+                            </div>
+                            <div style="text-align: center; padding: 12px; background: var(--light); border-radius: 8px;">
+                                <div style="font-size: 11px; color: var(--gray);">관심 종목</div>
+                                <div style="font-weight: bold; font-size: 16px;" id="watchlistCount">0</div>
+                            </div>
+                            <div style="text-align: center; padding: 12px; background: var(--light); border-radius: 8px;">
+                                <div style="font-size: 11px; color: var(--gray);">포트폴리오</div>
+                                <div style="font-weight: bold; font-size: 16px;" id="portfolioCount">0</div>
+                            </div>
+                            <div style="text-align: center; padding: 12px; background: var(--light); border-radius: 8px;">
+                                <div style="font-size: 11px; color: var(--gray);">매매 기록</div>
+                                <div style="font-weight: bold; font-size: 16px;" id="tradesCount">0</div>
+                            </div>
+                            <div style="text-align: center; padding: 12px; background: var(--light); border-radius: 8px;">
+                                <div style="font-size: 11px; color: var(--gray);">종목 분석</div>
+                                <div style="font-weight: bold; font-size: 16px;" id="analysisCount">0</div>
+                            </div>
+                            <div style="text-align: center; padding: 12px; background: var(--light); border-radius: 8px;">
+                                <div style="font-size: 11px; color: var(--gray);">감정 일기</div>
+                                <div style="font-weight: bold; font-size: 16px;" id="emotionCount">0</div>
+                            </div>
+                        </div>
+
+                        <h3 style="margin: 20px 0 15px; font-size: 16px;">데이터 백업 & 복원</h3>
+                        <div class="btn-group">
+                            <button class="btn-success" onclick="exportUserData()">
+                                📥 데이터 내보내기 (백업)
+                            </button>
+                            <button class="btn-primary" onclick="document.getElementById('importUserFile').click()">
+                                📤 데이터 가져오기 (복원)
+                            </button>
+                            <input type="file" id="importUserFile" style="display: none" accept=".json" onchange="importUserData(event)">
+                        </div>
+
+                        <h3 style="margin: 20px 0 15px; font-size: 16px;">⚠️ 위험 구역</h3>
+                        <div style="background: #fee2e2; padding: 15px; border-radius: 10px; border-left: 4px solid var(--danger);">
+                            <p style="color: #991b1b; font-size: 14px; margin-bottom: 10px;">
+                                아래 작업은 되돌릴 수 없습니다. 신중하게 선택하세요.
+                            </p>
+                            <div class="btn-group">
+                                <button class="btn-warning" onclick="clearAllData()">
+                                    🗑️ 모든 데이터 삭제
+                                </button>
+                                <button class="btn-danger" onclick="deleteAccount()">
+                                    ❌ 계정 삭제
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 통계 -->
+                <div class="card">
+                    <h2>📊 활동 통계</h2>
+                    <div class="grid grid-4">
+                        <div class="stat-card">
+                            <div class="stat-label">총 투자 원칙</div>
+                            <div class="stat-value" id="statPrinciples">0개</div>
+                            <div class="stat-change">투자 철학</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">총 매매 횟수</div>
+                            <div class="stat-value" id="statTrades">0회</div>
+                            <div class="stat-change">거래 활동</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">작성한 일기</div>
+                            <div class="stat-value" id="statDiary">0개</div>
+                            <div class="stat-change">감정 기록</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">분석한 종목</div>
+                            <div class="stat-value" id="statAnalysis">0개</div>
+                            <div class="stat-change">리서치</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 환경 설정 -->
+                <div class="card">
+                    <h2>⚙️ 환경 설정</h2>
+                    <div class="grid grid-2">
+                        <div>
+                            <h3 style="margin-bottom: 15px; font-size: 16px;">알림 설정</h3>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; 
+                                background: var(--light); border-radius: 8px; margin-bottom: 10px;">
+                                <span>목표 달성 알림</span>
+                                <input type="checkbox" id="notifyGoals" checked style="width: 20px; height: 20px; cursor: pointer;">
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; 
+                                background: var(--light); border-radius: 8px; margin-bottom: 10px;">
+                                <span>심리 체크 알림</span>
+                                <input type="checkbox" id="notifyMindset" checked style="width: 20px; height: 20px; cursor: pointer;">
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; 
+                                background: var(--light); border-radius: 8px;">
+                                <span>데이터 백업 알림</span>
+                                <input type="checkbox" id="notifyBackup" checked style="width: 20px; height: 20px; cursor: pointer;">
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 style="margin-bottom: 15px; font-size: 16px;">표시 설정</h3>
+                            <div class="form-group">
+                                <label>차트 기본 기간</label>
+                                <select id="chartPeriod">
+                                    <option value="1m">1개월</option>
+                                    <option value="3m">3개월</option>
+                                    <option value="6m" selected>6개월</option>
+                                    <option value="1y">1년</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>통화 표시</label>
+                                <select id="currency">
+                                    <option value="KRW" selected>원화 (KRW)</option>
+                                    <option value="USD">달러 (USD)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="saveSettings()">💾 설정 저장</button>
+                    <div id="settingsResult" style="margin-top: 10px;"></div>
+                </div>
+            </div>
+
+            <!-- 계정 관리 -->
+            <div id="account" class="section">
+                <div class="grid grid-2">
+                    <!-- 계정 정보 -->
+                    <div class="card">
+                        <h2>👤 계정 정보</h2>
+                        <div style="background: var(--light); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                            <div style="text-align: center; margin-bottom: 15px;">
+                                <div style="width: 80px; height: 80px; margin: 0 auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                    border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px;">
+                                    👤
+                                </div>
+                            </div>
+                            <div style="text-align: center;">
+                                <h3 id="accountUsername" style="font-size: 24px; margin-bottom: 5px;">-</h3>
+                                <p id="accountCreatedAt" style="color: var(--gray); font-size: 13px;">가입일: -</p>
+                            </div>
+                        </div>
+
+                        <div style="background: white; padding: 15px; border-radius: 8px; border: 2px solid var(--border);">
+                            <h4 style="margin-bottom: 15px; font-size: 14px;">📊 활동 통계</h4>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                                <div style="text-align: center; padding: 12px; background: var(--light); border-radius: 8px;">
+                                    <div style="font-size: 11px; color: var(--gray);">투자 원칙</div>
+                                    <div style="font-weight: bold; font-size: 16px;" id="principlesCount">0</div>
+                                </div>
+                                <div style="text-align: center; padding: 12px; background: var(--light); border-radius: 8px;">
+                                    <div style="font-size: 11px; color: var(--gray);">관심 종목</div>
+                                    <div style="font-weight: bold; font-size: 16px;" id="watchlistCount">0</div>
+                                </div>
+                                <div style="text-align: center; padding: 12px; background: var(--light); border-radius: 8px;">
+                                    <div style="font-size: 11px; color: var(--gray);">포트폴리오</div>
+                                    <div style="font-weight: bold; font-size: 16px;" id="portfolioCount">0</div>
+                                </div>
+                                <div style="text-align: center; padding: 12px; background: var(--light); border-radius: 8px;">
+                                    <div style="font-size: 11px; color: var(--gray);">매매 기록</div>
+                                    <div style="font-weight: bold; font-size: 16px;" id="tradesCount">0</div>
+                                </div>
+                                <div style="text-align: center; padding: 12px; background: var(--light); border-radius: 8px;">
+                                    <div style="font-size: 11px; color: var(--gray);">종목 분석</div>
+                                    <div style="font-weight: bold; font-size: 16px;" id="analysisCount">0</div>
+                                </div>
+                                <div style="text-align: center; padding: 12px; background: var(--light); border-radius: 8px;">
+                                    <div style="font-size: 11px; color: var(--gray);">투자 목표</div>
+                                    <div style="font-weight: bold; font-size: 16px;" id="goalsCount">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 비밀번호 변경 -->
+                    <div class="card">
+                        <h2>🔐 비밀번호 변경</h2>
+                        <div class="form-group">
+                            <label>현재 비밀번호</label>
+                            <input type="password" id="currentPassword" placeholder="현재 비밀번호를 입력하세요">
+                        </div>
+                        <div class="form-group">
+                            <label>새 비밀번호</label>
+                            <input type="password" id="newPassword" placeholder="새 비밀번호 (6자 이상)">
+                        </div>
+                        <div class="form-group">
+                            <label>새 비밀번호 확인</label>
+                            <input type="password" id="newPasswordConfirm" placeholder="새 비밀번호 다시 입력">
+                        </div>
+                        <div id="passwordChangeResult" style="margin-bottom: 15px;"></div>
+                        <button onclick="changePassword()">🔄 비밀번호 변경</button>
+                    </div>
+                </div>
+
+                <!-- 데이터 관리 -->
+                <div class="card">
+                    <h2>💾 데이터 관리</h2>
+                    <div class="grid grid-3">
+                        <div style="text-align: center; padding: 25px; background: var(--light); border-radius: 12px;">
+                            <div style="font-size: 48px; margin-bottom: 10px;">📥</div>
+                            <h4 style="margin-bottom: 10px;">데이터 내보내기</h4>
+                            <p style="color: var(--gray); font-size: 13px; margin-bottom: 15px;">
+                                모든 투자 데이터를 JSON 파일로 백업
+                            </p>
+                            <button onclick="exportData()" class="btn-success">내보내기</button>
+                        </div>
+
+                        <div style="text-align: center; padding: 25px; background: var(--light); border-radius: 12px;">
+                            <div style="font-size: 48px; margin-bottom: 10px;">📤</div>
+                            <h4 style="margin-bottom: 10px;">데이터 가져오기</h4>
+                            <p style="color: var(--gray); font-size: 13px; margin-bottom: 15px;">
+                                백업한 JSON 파일에서 데이터 복원
+                            </p>
+                            <button onclick="document.getElementById('importFileAccount').click()" class="btn-primary">
+                                가져오기
+                            </button>
+                            <input type="file" id="importFileAccount" style="display: none" accept=".json" onchange="importData(event)">
+                        </div>
+
+                        <div style="text-align: center; padding: 25px; background: var(--light); border-radius: 12px;">
+                            <div style="font-size: 48px; margin-bottom: 10px;">🗑️</div>
+                            <h4 style="margin-bottom: 10px;">데이터 초기화</h4>
+                            <p style="color: var(--gray); font-size: 13px; margin-bottom: 15px;">
+                                모든 투자 데이터를 삭제 (계정은 유지)
+                            </p>
+                            <button onclick="clearAllData()" class="btn-danger">전체 삭제</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 계정 삭제 -->
+                <div class="card" style="border: 2px solid var(--danger);">
+                    <h2 style="color: var(--danger);">⚠️ 위험 구역</h2>
+                    <div style="background: #fee2e2; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                        <h4 style="color: var(--danger); margin-bottom: 10px;">계정 삭제</h4>
+                        <p style="color: #991b1b; font-size: 14px; line-height: 1.6; margin-bottom: 15px;">
+                            계정을 삭제하면 <strong>모든 투자 데이터가 영구적으로 삭제</strong>되며 복구할 수 없습니다.
+                            <br>신중하게 결정하세요.
+                        </p>
+                        <div class="form-group">
+                            <label style="color: var(--danger);">삭제 확인 (DELETE 입력)</label>
+                            <input type="text" id="deleteConfirm" placeholder="DELETE를 정확히 입력하세요" 
+                                style="border-color: var(--danger);">
+                        </div>
+                        <button onclick="deleteAccount()" class="btn-danger" style="width: 100%;">
+                            🗑️ 계정 영구 삭제
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 사용 통계 -->
+                <div class="card">
+                    <h2>📊 사용 통계</h2>
+                    <div id="usageStats"></div>
                 </div>
             </div>
         </main>
@@ -2758,6 +3240,274 @@
         }
 
         // =================
+        // 종목 스크리너
+        // =================
+        
+        // 수익률 디스플레이 업데이트
+        function updateReturnDisplay() {
+            const value = document.getElementById('returnMin').value;
+            document.getElementById('returnMinDisplay').textContent = value + '%';
+        }
+
+        // 자연어 검색
+        async function searchByNaturalLanguage() {
+            const query = document.getElementById('naturalSearch').value.trim().toLowerCase();
+            
+            if (!query) {
+                alert('검색어를 입력하세요!');
+                return;
+            }
+
+            // 자연어에서 조건 추출
+            let returnMin = 0;
+            let market = 'kospi';
+            
+            // 수익률 추출
+            const returnMatch = query.match(/(\d+)(?:%|프로|퍼센트)/);
+            if (returnMatch) {
+                returnMin = parseInt(returnMatch[1]);
+                document.getElementById('returnMin').value = returnMin;
+                updateReturnDisplay();
+            }
+
+            // 시장 추출
+            if (query.includes('코스피') || query.includes('kospi')) {
+                market = 'kospi';
+            } else if (query.includes('코스닥') || query.includes('kosdaq')) {
+                market = 'kosdaq';
+            } else if (query.includes('나스닥') || query.includes('nasdaq')) {
+                market = 'nasdaq';
+            } else if (query.includes('뉴욕') || query.includes('nyse')) {
+                market = 'nyse';
+            }
+            
+            document.getElementById('marketSelect').value = market;
+
+            // PER 추출
+            const perMatch = query.match(/per\s*(\d+)/i);
+            if (perMatch) {
+                document.getElementById('perMax').value = perMatch[1];
+            }
+
+            // PBR 추출
+            const pbrMatch = query.match(/pbr\s*(\d+)/i);
+            if (pbrMatch) {
+                document.getElementById('pbrMax').value = pbrMatch[1];
+            }
+
+            // 검색 실행
+            await screenStocks();
+        }
+
+        // 프리셋 적용
+        function applyPreset(type) {
+            // 초기화
+            document.getElementById('perMax').value = '';
+            document.getElementById('pbrMax').value = '';
+            document.getElementById('roeMin').value = '';
+            document.getElementById('debtMax').value = '';
+            
+            if (type === 'growth') {
+                // 고성장주
+                document.getElementById('returnMin').value = 30;
+                document.getElementById('roeMin').value = 15;
+                document.getElementById('naturalSearch').value = '수익률 30% 이상, ROE 15% 이상인 고성장주';
+            } else if (type === 'value') {
+                // 가치주
+                document.getElementById('returnMin').value = 0;
+                document.getElementById('perMax').value = 10;
+                document.getElementById('pbrMax').value = 1;
+                document.getElementById('naturalSearch').value = 'PER 10 이하, PBR 1 이하인 저평가 가치주';
+            } else if (type === 'safe') {
+                // 안전주
+                document.getElementById('returnMin').value = 5;
+                document.getElementById('roeMin').value = 10;
+                document.getElementById('debtMax').value = 50;
+                document.getElementById('naturalSearch').value = '부채비율 50% 이하, ROE 10% 이상인 안전주';
+            }
+            
+            updateReturnDisplay();
+            screenStocks();
+        }
+
+        // 종목 스크리닝 (실제 API 호출 대신 샘플 데이터 사용)
+        async function screenStocks() {
+            const resultsDiv = document.getElementById('screenerResults');
+            const loadingDiv = document.getElementById('screenerLoading');
+            
+            // 조건 수집
+            const market = document.getElementById('marketSelect').value;
+            const returnMin = parseFloat(document.getElementById('returnMin').value) || 0;
+            const perMax = parseFloat(document.getElementById('perMax').value) || 999;
+            const pbrMax = parseFloat(document.getElementById('pbrMax').value) || 999;
+            const roeMin = parseFloat(document.getElementById('roeMin').value) || 0;
+            const debtMax = parseFloat(document.getElementById('debtMax').value) || 999;
+            
+            // 로딩 표시
+            loadingDiv.style.display = 'block';
+            resultsDiv.innerHTML = '';
+            
+            // 시뮬레이션 지연 (실제 API 호출 느낌)
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // 샘플 데이터 (실제로는 API에서 가져옴)
+            const sampleStocks = generateSampleStocks(market);
+            
+            // 필터링
+            const filtered = sampleStocks.filter(stock => {
+                return stock.return >= returnMin &&
+                       stock.per <= perMax &&
+                       stock.pbr <= pbrMax &&
+                       stock.roe >= roeMin &&
+                       stock.debt <= debtMax;
+            });
+            
+            loadingDiv.style.display = 'none';
+            
+            if (filtered.length === 0) {
+                resultsDiv.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">😔</div>
+                        <h3>조건에 맞는 종목이 없습니다</h3>
+                        <p>조건을 조금 완화해보세요</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 수익률 순으로 정렬
+            filtered.sort((a, b) => b.return - a.return);
+            
+            // 결과 표시
+            resultsDiv.innerHTML = `
+                <h3 style="margin-bottom: 20px;">
+                    🎯 검색 결과: <strong>${filtered.length}개</strong> 종목 발견
+                </h3>
+                <div class="grid">
+                    ${filtered.map(stock => `
+                        <div class="item-card" style="border-left: 4px solid ${stock.return >= 20 ? 'var(--success)' : stock.return >= 10 ? 'var(--primary)' : 'var(--warning)'};">
+                            <div class="item-header">
+                                <div>
+                                    <span class="item-title">${stock.name}</span>
+                                    <span style="color: var(--gray); margin-left: 10px; font-size: 13px;">${stock.code}</span>
+                                </div>
+                                <span style="font-size: 20px; font-weight: bold; color: ${stock.return >= 0 ? 'var(--danger)' : 'var(--primary)'}">
+                                    ${stock.return >= 0 ? '+' : ''}${stock.return.toFixed(1)}%
+                                </span>
+                            </div>
+                            
+                            <div class="item-meta" style="margin-top: 10px;">
+                                <span>현재가: ${stock.price.toLocaleString()}원</span>
+                                <span>시총: ${formatMoney(stock.marketCap * 100000000)}</span>
+                            </div>
+                            
+                            <div style="margin-top: 15px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                                <div style="text-align: center; padding: 8px; background: white; border-radius: 6px;">
+                                    <div style="font-size: 11px; color: var(--gray);">PER</div>
+                                    <div style="font-weight: bold; font-size: 14px;">${stock.per.toFixed(1)}</div>
+                                </div>
+                                <div style="text-align: center; padding: 8px; background: white; border-radius: 6px;">
+                                    <div style="font-size: 11px; color: var(--gray);">PBR</div>
+                                    <div style="font-weight: bold; font-size: 14px;">${stock.pbr.toFixed(1)}</div>
+                                </div>
+                                <div style="text-align: center; padding: 8px; background: white; border-radius: 6px;">
+                                    <div style="font-size: 11px; color: var(--gray);">ROE</div>
+                                    <div style="font-weight: bold; font-size: 14px;">${stock.roe.toFixed(1)}%</div>
+                                </div>
+                                <div style="text-align: center; padding: 8px; background: white; border-radius: 6px;">
+                                    <div style="font-size: 11px; color: var(--gray);">부채</div>
+                                    <div style="font-weight: bold; font-size: 14px;">${stock.debt.toFixed(0)}%</div>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: 15px; display: flex; gap: 10px;">
+                                <button class="btn-success btn-sm" onclick="addToWatchlistFromScreener('${stock.name}', '${stock.code}', ${stock.price})" style="flex: 1;">
+                                    👀 관심 종목 추가
+                                </button>
+                                <button class="btn-primary btn-sm" onclick="addToPortfolioFromScreener('${stock.name}', '${stock.code}', ${stock.price})" style="flex: 1;">
+                                    💼 포트폴리오 추가
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // 샘플 데이터 생성
+        function generateSampleStocks(market) {
+            const kospiStocks = [
+                { name: '삼성전자', code: '005930', price: 71200, marketCap: 4254, return: 12.5, per: 18.2, pbr: 1.4, roe: 11.8, debt: 45 },
+                { name: 'SK하이닉스', code: '000660', price: 142500, marketCap: 1038, return: 45.2, per: 12.5, pbr: 2.1, roe: 18.5, debt: 38 },
+                { name: 'LG에너지솔루션', code: '373220', price: 385000, marketCap: 895, return: -8.3, per: 25.4, pbr: 3.2, roe: 8.2, debt: 52 },
+                { name: 'NAVER', code: '035420', price: 185000, marketCap: 304, return: 22.1, per: 28.5, pbr: 2.8, roe: 12.4, debt: 28 },
+                { name: '카카오', code: '035720', price: 42500, marketCap: 185, return: -15.2, per: 35.2, pbr: 1.9, roe: 5.8, debt: 42 },
+                { name: '현대차', code: '005380', price: 245000, marketCap: 524, return: 38.5, per: 6.8, pbr: 0.7, roe: 15.2, debt: 65 },
+                { name: 'KB금융', code: '105560', price: 68500, marketCap: 282, return: 18.4, per: 5.2, pbr: 0.5, roe: 11.5, debt: 125 },
+                { name: '셀트리온', code: '068270', price: 165000, marketCap: 221, return: 5.2, per: 22.1, pbr: 3.1, roe: 9.8, debt: 35 },
+                { name: '삼성SDI', code: '006400', price: 385000, marketCap: 265, return: -12.5, per: 18.5, pbr: 2.2, roe: 8.5, debt: 48 },
+                { name: 'POSCO홀딩스', code: '005490', price: 385000, marketCap: 325, return: 28.5, per: 8.2, pbr: 0.9, roe: 14.2, debt: 72 }
+            ];
+
+            const nasdaqStocks = [
+                { name: 'Apple', code: 'AAPL', price: 195, marketCap: 30000, return: 48.2, per: 32.5, pbr: 45.2, roe: 147.5, debt: 18 },
+                { name: 'Microsoft', code: 'MSFT', price: 415, marketCap: 30800, return: 52.8, per: 38.2, pbr: 12.5, roe: 42.8, debt: 25 },
+                { name: 'NVIDIA', code: 'NVDA', price: 880, marketCap: 21700, return: 238.5, per: 75.2, pbr: 52.8, roe: 115.2, debt: 12 },
+                { name: 'Tesla', code: 'TSLA', price: 257, marketCap: 8200, return: -18.5, per: 82.5, pbr: 15.2, roe: 28.5, debt: 8 },
+                { name: 'Meta', code: 'META', price: 485, marketCap: 12400, return: 182.5, per: 28.5, pbr: 8.2, roe: 35.2, debt: 5 },
+                { name: 'Amazon', code: 'AMZN', price: 175, marketCap: 18100, return: 78.5, per: 68.2, pbr: 8.5, roe: 18.2, debt: 15 },
+                { name: 'Alphabet', code: 'GOOGL', price: 155, marketCap: 19500, return: 58.2, per: 28.5, pbr: 6.8, roe: 28.5, debt: 8 },
+                { name: 'Netflix', code: 'NFLX', price: 625, marketCap: 2700, return: 62.5, per: 45.2, pbr: 8.5, roe: 32.5, debt: 22 }
+            ];
+
+            if (market === 'kospi' || market === 'kosdaq') {
+                return kospiStocks;
+            } else {
+                return nasdaqStocks;
+            }
+        }
+
+        // 스크리너에서 관심 종목 추가
+        function addToWatchlistFromScreener(name, code, price) {
+            // 중복 체크
+            if (appData.watchlist.find(s => s.code === code)) {
+                alert('이미 관심 종목에 추가되어 있습니다!');
+                return;
+            }
+
+            appData.watchlist.push({
+                id: Date.now(),
+                name: name,
+                code: code,
+                price: price,
+                targetPrice: Math.round(price * 1.2), // 20% 목표가
+                memo: '스크리너에서 추가된 종목',
+                lastUpdate: new Date().toISOString()
+            });
+
+            saveData();
+            alert(`✅ ${name}이(가) 관심 종목에 추가되었습니다!`);
+        }
+
+        // 스크리너에서 포트폴리오 추가
+        function addToPortfolioFromScreener(name, code, price) {
+            // 관심 종목 탭으로 이동
+            showSection('portfolio');
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('[onclick*="portfolio"]').classList.add('active');
+
+            // 폼에 자동 입력
+            document.getElementById('portStockName').value = name;
+            document.getElementById('portStockCode').value = code;
+            document.getElementById('portCurrentPrice').value = price;
+            
+            // 수량 입력란으로 포커스
+            document.getElementById('portQuantity').focus();
+            
+            alert(`종목 정보가 입력되었습니다. 수량과 매수가를 입력하세요!`);
+        }
+
+        // =================
         // 마인드 컨트롤
         // =================
         
@@ -3103,6 +3853,482 @@
         }
 
         // =================
+        // 계정 관리
+        // =================
+        
+        // 계정 정보 표시
+        function renderAccountInfo() {
+            if (!currentUser) return;
+            
+            const users = getUsersData();
+            const userInfo = users[currentUser];
+            
+            document.getElementById('accountUsername').textContent = currentUser;
+            
+            if (userInfo && userInfo.createdAt) {
+                const created = new Date(userInfo.createdAt);
+                document.getElementById('accountCreated').textContent = 
+                    `${created.getFullYear()}.${String(created.getMonth() + 1).padStart(2, '0')}.${String(created.getDate()).padStart(2, '0')}`;
+            }
+            
+            // 데이터 개수 업데이트
+            updateDataCounts();
+        }
+
+        // 데이터 개수 업데이트
+        function updateDataCounts() {
+            const total = 
+                appData.principles.length +
+                appData.watchlist.length +
+                appData.portfolio.length +
+                appData.trades.length +
+                appData.analysis.length +
+                appData.goals.length +
+                appData.emotionDiary.length +
+                appData.mistakes.length +
+                appData.successes.length +
+                appData.quotes.length;
+            
+            document.getElementById('totalDataCount').textContent = total + '개';
+            document.getElementById('principlesCount').textContent = appData.principles.length;
+            document.getElementById('watchlistCount').textContent = appData.watchlist.length;
+            document.getElementById('portfolioCount').textContent = appData.portfolio.length;
+            document.getElementById('tradesCount').textContent = appData.trades.length;
+            document.getElementById('analysisCount').textContent = appData.analysis.length;
+            document.getElementById('emotionCount').textContent = appData.emotionDiary.length;
+            
+            // 통계
+            document.getElementById('statPrinciples').textContent = appData.principles.length + '개';
+            document.getElementById('statTrades').textContent = appData.trades.length + '회';
+            document.getElementById('statDiary').textContent = appData.emotionDiary.length + '개';
+            document.getElementById('statAnalysis').textContent = appData.analysis.length + '개';
+        }
+
+        // 비밀번호 변경
+        function changePassword() {
+            const currentPw = document.getElementById('currentPassword').value;
+            const newPw = document.getElementById('newPassword').value;
+            const newPwConfirm = document.getElementById('newPasswordConfirm').value;
+            const resultDiv = document.getElementById('passwordChangeResult');
+            
+            if (!currentPw || !newPw || !newPwConfirm) {
+                resultDiv.innerHTML = '<div style="padding: 10px; background: #fee2e2; color: var(--danger); border-radius: 8px;">모든 항목을 입력하세요.</div>';
+                return;
+            }
+            
+            const users = getUsersData();
+            
+            if (users[currentUser].password !== currentPw) {
+                resultDiv.innerHTML = '<div style="padding: 10px; background: #fee2e2; color: var(--danger); border-radius: 8px;">현재 비밀번호가 일치하지 않습니다.</div>';
+                return;
+            }
+            
+            if (newPw.length < 6) {
+                resultDiv.innerHTML = '<div style="padding: 10px; background: #fee2e2; color: var(--danger); border-radius: 8px;">새 비밀번호는 6자 이상이어야 합니다.</div>';
+                return;
+            }
+            
+            if (newPw !== newPwConfirm) {
+                resultDiv.innerHTML = '<div style="padding: 10px; background: #fee2e2; color: var(--danger); border-radius: 8px;">새 비밀번호가 일치하지 않습니다.</div>';
+                return;
+            }
+            
+            users[currentUser].password = newPw;
+            saveUsersData(users);
+            
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('newPasswordConfirm').value = '';
+            
+            resultDiv.innerHTML = '<div style="padding: 10px; background: #d1fae5; color: var(--success); border-radius: 8px;">✅ 비밀번호가 변경되었습니다!</div>';
+            
+            setTimeout(() => {
+                resultDiv.innerHTML = '';
+            }, 3000);
+        }
+
+        // 데이터 내보내기 (사용자별)
+        function exportUserData() {
+            const dataStr = JSON.stringify(appData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `investment-backup-${currentUser}-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            alert('✅ 데이터가 백업되었습니다!');
+        }
+
+        // 데이터 가져오기 (사용자별)
+        function importUserData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!confirm('현재 데이터를 모두 덮어쓰시겠습니까?\n기존 데이터는 복구할 수 없습니다!')) {
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    appData = imported;
+                    saveUserData();
+                    renderAll();
+                    updateDataCounts();
+                    alert('✅ 데이터를 불러왔습니다!');
+                } catch (error) {
+                    alert('❌ 파일 형식이 잘못되었습니다!');
+                }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        // 모든 데이터 삭제
+        function clearAllData() {
+            if (!confirm('⚠️ 정말로 모든 데이터를 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다!')) {
+                return;
+            }
+            
+            if (!confirm('❗ 마지막 확인:\n정말로 모든 투자 원칙, 종목, 매매 기록을 삭제하시겠습니까?')) {
+                return;
+            }
+            
+            appData = {
+                principles: [],
+                watchlist: [],
+                portfolio: [],
+                trades: [],
+                analysis: [],
+                goals: [],
+                memos: [],
+                mindsetChecks: [],
+                emotionDiary: [],
+                mistakes: [],
+                successes: [],
+                quotes: []
+            };
+            
+            saveUserData();
+            renderAll();
+            updateDataCounts();
+            
+            alert('🗑️ 모든 데이터가 삭제되었습니다.');
+        }
+
+        // 계정 삭제
+        function deleteAccount() {
+            if (!confirm('⚠️ 정말로 계정을 삭제하시겠습니까?\n\n모든 데이터가 영구적으로 삭제됩니다!')) {
+                return;
+            }
+            
+            const confirmText = prompt('계정을 삭제하려면 사용자 이름을 입력하세요:\n\n' + currentUser);
+            
+            if (confirmText !== currentUser) {
+                alert('사용자 이름이 일치하지 않습니다.');
+                return;
+            }
+            
+            // 사용자 데이터 삭제
+            const userDataKey = `investmentData_${currentUser}`;
+            localStorage.removeItem(userDataKey);
+            
+            // 사용자 계정 삭제
+            const users = getUsersData();
+            delete users[currentUser];
+            saveUsersData(users);
+            
+            alert('👋 계정이 삭제되었습니다. 이용해주셔서 감사합니다.');
+            
+            // 로그아웃
+            currentUser = null;
+            sessionStorage.removeItem('currentUser');
+            appData = {
+                principles: [],
+                watchlist: [],
+                portfolio: [],
+                trades: [],
+                analysis: [],
+                goals: [],
+                memos: [],
+                mindsetChecks: [],
+                emotionDiary: [],
+                mistakes: [],
+                successes: [],
+                quotes: []
+            };
+            
+            renderAll();
+            showLoginModal();
+        }
+
+        // 설정 저장
+        function saveSettings() {
+            const settings = {
+                notifyGoals: document.getElementById('notifyGoals').checked,
+                notifyMindset: document.getElementById('notifyMindset').checked,
+                notifyBackup: document.getElementById('notifyBackup').checked,
+                chartPeriod: document.getElementById('chartPeriod').value,
+                currency: document.getElementById('currency').value
+            };
+            
+            const settingsKey = `settings_${currentUser}`;
+            localStorage.setItem(settingsKey, JSON.stringify(settings));
+            
+            const resultDiv = document.getElementById('settingsResult');
+            resultDiv.innerHTML = '<div style="padding: 10px; background: #d1fae5; color: var(--success); border-radius: 8px;">✅ 설정이 저장되었습니다!</div>';
+            
+            setTimeout(() => {
+                resultDiv.innerHTML = '';
+            }, 3000);
+        }
+
+        // 설정 불러오기
+        function loadSettings() {
+            if (!currentUser) return;
+            
+            const settingsKey = `settings_${currentUser}`;
+            const saved = localStorage.getItem(settingsKey);
+            
+            if (saved) {
+                const settings = JSON.parse(saved);
+                document.getElementById('notifyGoals').checked = settings.notifyGoals !== false;
+                document.getElementById('notifyMindset').checked = settings.notifyMindset !== false;
+                document.getElementById('notifyBackup').checked = settings.notifyBackup !== false;
+                document.getElementById('chartPeriod').value = settings.chartPeriod || '6m';
+                document.getElementById('currency').value = settings.currency || 'KRW';
+            }
+        }
+
+        // =================
+        // 계정 관리
+        // =================
+        
+        // 계정 정보 업데이트
+        function updateAccountInfo() {
+            if (!currentUser) return;
+            
+            const users = getUsersData();
+            const userInfo = users[currentUser];
+            
+            if (!userInfo) return;
+            
+            // 계정 정보 표시
+            document.getElementById('accountUsername').textContent = currentUser;
+            
+            if (userInfo.createdAt) {
+                const date = new Date(userInfo.createdAt);
+                document.getElementById('accountCreatedAt').textContent = 
+                    `가입일: ${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+            }
+            
+            // 통계 업데이트
+            document.getElementById('principlesCount').textContent = appData.principles.length;
+            document.getElementById('watchlistCount').textContent = appData.watchlist.length;
+            document.getElementById('portfolioCount').textContent = appData.portfolio.length;
+            document.getElementById('tradesCount').textContent = appData.trades.length;
+            document.getElementById('analysisCount').textContent = appData.analysis.length;
+            document.getElementById('goalsCount').textContent = appData.goals.length;
+            
+            // 사용 통계
+            updateUsageStats();
+        }
+
+        // 사용 통계
+        function updateUsageStats() {
+            const statsDiv = document.getElementById('usageStats');
+            if (!statsDiv) return;
+            
+            // 총 투자액
+            let totalInvestment = 0;
+            appData.portfolio.forEach(p => {
+                totalInvestment += p.buyPrice * p.quantity;
+            });
+            
+            // 매매 횟수
+            const buyCount = appData.trades.filter(t => t.type === 'buy').length;
+            const sellCount = appData.trades.filter(t => t.type === 'sell').length;
+            
+            // 가장 최근 활동
+            let lastActivity = '-';
+            const allDates = [
+                ...appData.trades.map(t => t.date),
+                ...appData.principles.map(p => p.id),
+                ...appData.watchlist.map(w => w.id)
+            ].filter(d => d);
+            
+            if (allDates.length > 0) {
+                const latest = new Date(Math.max(...allDates.map(d => new Date(d).getTime())));
+                lastActivity = formatDate(latest.toISOString());
+            }
+            
+            statsDiv.innerHTML = `
+                <div class="grid grid-4">
+                    <div style="text-align: center; padding: 20px; background: var(--light); border-radius: 10px;">
+                        <div style="font-size: 13px; color: var(--gray); margin-bottom: 5px;">총 투자액</div>
+                        <div style="font-size: 22px; font-weight: bold;">${formatMoney(totalInvestment)}</div>
+                    </div>
+                    <div style="text-align: center; padding: 20px; background: var(--light); border-radius: 10px;">
+                        <div style="font-size: 13px; color: var(--gray); margin-bottom: 5px;">매수</div>
+                        <div style="font-size: 22px; font-weight: bold; color: var(--danger);">${buyCount}회</div>
+                    </div>
+                    <div style="text-align: center; padding: 20px; background: var(--light); border-radius: 10px;">
+                        <div style="font-size: 13px; color: var(--gray); margin-bottom: 5px;">매도</div>
+                        <div style="font-size: 22px; font-weight: bold; color: var(--primary);">${sellCount}회</div>
+                    </div>
+                    <div style="text-align: center; padding: 20px; background: var(--light); border-radius: 10px;">
+                        <div style="font-size: 13px; color: var(--gray); margin-bottom: 5px;">최근 활동</div>
+                        <div style="font-size: 18px; font-weight: bold;">${lastActivity}</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 20px; background: var(--light); border-radius: 10px;">
+                    <h4 style="margin-bottom: 15px;">📈 데이터 현황</h4>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="display: flex; justify-content: space-between; padding: 10px; background: white; border-radius: 6px;">
+                            <span>투자 원칙</span>
+                            <strong>${appData.principles.length}개</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px; background: white; border-radius: 6px;">
+                            <span>관심 종목</span>
+                            <strong>${appData.watchlist.length}개</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px; background: white; border-radius: 6px;">
+                            <span>보유 종목</span>
+                            <strong>${appData.portfolio.length}개</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px; background: white; border-radius: 6px;">
+                            <span>매매 기록</span>
+                            <strong>${appData.trades.length}개</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px; background: white; border-radius: 6px;">
+                            <span>종목 분석</span>
+                            <strong>${appData.analysis.length}개</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px; background: white; border-radius: 6px;">
+                            <span>감정 일기</span>
+                            <strong>${appData.emotionDiary ? appData.emotionDiary.length : 0}개</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 비밀번호 변경
+        function changePassword() {
+            const current = document.getElementById('currentPassword').value;
+            const newPw = document.getElementById('newPassword').value;
+            const newPwConfirm = document.getElementById('newPasswordConfirm').value;
+            const resultDiv = document.getElementById('passwordChangeResult');
+            
+            if (!current || !newPw || !newPwConfirm) {
+                resultDiv.innerHTML = '<div style="padding: 10px; background: #fee2e2; color: var(--danger); border-radius: 8px;">모든 필드를 입력하세요.</div>';
+                return;
+            }
+            
+            if (newPw.length < 6) {
+                resultDiv.innerHTML = '<div style="padding: 10px; background: #fee2e2; color: var(--danger); border-radius: 8px;">새 비밀번호는 6자 이상이어야 합니다.</div>';
+                return;
+            }
+            
+            if (newPw !== newPwConfirm) {
+                resultDiv.innerHTML = '<div style="padding: 10px; background: #fee2e2; color: var(--danger); border-radius: 8px;">새 비밀번호가 일치하지 않습니다.</div>';
+                return;
+            }
+            
+            const users = getUsersData();
+            
+            if (users[currentUser].password !== current) {
+                resultDiv.innerHTML = '<div style="padding: 10px; background: #fee2e2; color: var(--danger); border-radius: 8px;">현재 비밀번호가 올바르지 않습니다.</div>';
+                return;
+            }
+            
+            // 비밀번호 변경
+            users[currentUser].password = newPw;
+            saveUsersData(users);
+            
+            // 폼 초기화
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('newPasswordConfirm').value = '';
+            
+            resultDiv.innerHTML = '<div style="padding: 10px; background: #d1fae5; color: var(--success); border-radius: 8px;">✅ 비밀번호가 성공적으로 변경되었습니다!</div>';
+            
+            setTimeout(() => {
+                resultDiv.innerHTML = '';
+            }, 3000);
+        }
+
+        // 데이터 초기화
+        function clearAllData() {
+            if (!confirm('⚠️ 정말로 모든 투자 데이터를 삭제하시겠습니까?\n\n계정은 유지되지만 모든 투자 기록이 사라집니다.\n\n이 작업은 되돌릴 수 없습니다!')) {
+                return;
+            }
+            
+            if (!confirm('⚠️ 마지막 확인:\n\n정말로 삭제하시겠습니까?')) {
+                return;
+            }
+            
+            // 데이터 초기화
+            appData = {
+                principles: [],
+                watchlist: [],
+                portfolio: [],
+                trades: [],
+                analysis: [],
+                goals: [],
+                memos: [],
+                mindsetChecks: [],
+                emotionDiary: [],
+                mistakes: [],
+                successes: [],
+                quotes: []
+            };
+            
+            saveUserData();
+            renderAll();
+            updateAccountInfo();
+            
+            alert('✅ 모든 데이터가 삭제되었습니다.');
+        }
+
+        // 계정 삭제
+        function deleteAccount() {
+            const confirm = document.getElementById('deleteConfirm').value;
+            
+            if (confirm !== 'DELETE') {
+                alert('❌ DELETE를 정확히 입력하세요.');
+                return;
+            }
+            
+            if (!window.confirm('⚠️ 최종 경고!\n\n계정과 모든 데이터가 영구적으로 삭제됩니다.\n복구가 불가능합니다.\n\n정말로 계속하시겠습니까?')) {
+                return;
+            }
+            
+            // 사용자 데이터 삭제
+            const users = getUsersData();
+            delete users[currentUser];
+            saveUsersData(users);
+            
+            // 투자 데이터 삭제
+            const userDataKey = `investmentData_${currentUser}`;
+            localStorage.removeItem(userDataKey);
+            
+            // 로그아웃
+            currentUser = null;
+            sessionStorage.removeItem('currentUser');
+            
+            alert('계정이 삭제되었습니다. 이용해주셔서 감사합니다.');
+            
+            // 로그인 화면으로
+            showLoginModal();
+        }
+
+        // =================
         // 전체 렌더링
         // =================
         function renderAll() {
@@ -3116,9 +4342,12 @@
             renderMistakes();
             renderSuccesses();
             renderQuotes();
+            renderAccountInfo();
+            loadSettings();
             updateDashboard();
             updatePerformance();
             updateMindsetChart();
+            updateAccountInfo();
         }
     </script>
 </body>

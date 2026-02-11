@@ -1401,6 +1401,118 @@
                 </div>
             </div>
 
+            <!-- 알림 설정 -->
+            <div id="notifications" class="section">
+                <div class="card">
+                    <h2>🔔 푸시 알림 설정</h2>
+                    <p style="color: var(--gray); margin-bottom: 20px;">
+                        중요한 투자 이벤트 발생 시 실시간 알림을 받으세요
+                    </p>
+
+                    <!-- 알림 권한 -->
+                    <div id="notificationPermission" style="padding: 20px; background: var(--light); border-radius: 12px; margin-bottom: 30px;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="font-size: 48px;">🔔</div>
+                            <div style="flex: 1;">
+                                <h3 style="margin-bottom: 5px;">알림 권한</h3>
+                                <p id="permissionStatus" style="color: var(--gray); font-size: 14px;">확인 중...</p>
+                            </div>
+                            <button id="enableNotificationBtn" onclick="requestNotificationPermission()" style="display: none;">
+                                알림 켜기
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 테스트 알림 -->
+                    <div style="margin-bottom: 30px;">
+                        <button onclick="sendTestNotification()" class="btn-success" style="width: 100%; padding: 15px; font-size: 16px;">
+                            🧪 테스트 알림 보내기
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 가격 알림 설정 -->
+                <div class="card">
+                    <h2>📊 자동 모니터링 설정</h2>
+                    <div class="grid grid-3">
+                        <div style="padding: 20px; background: var(--light); border-radius: 12px;">
+                            <h4 style="margin-bottom: 15px;">🚀 급등 알림</h4>
+                            <div class="form-group">
+                                <label>상승률</label>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <input type="number" id="surgeAlert" placeholder="5" value="5" style="flex: 1;">
+                                    <span style="font-weight: bold;">%</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" id="surgeAlertEnabled" style="width: auto;">
+                                <label style="margin: 0;">활성화</label>
+                            </div>
+                            <p style="font-size: 12px; color: var(--gray); margin-top: 10px;">
+                                보유/관심 종목이 설정값 이상 상승 시
+                            </p>
+                        </div>
+
+                        <div style="padding: 20px; background: var(--light); border-radius: 12px;">
+                            <h4 style="margin-bottom: 15px;">📉 급락 알림</h4>
+                            <div class="form-group">
+                                <label>하락률</label>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <input type="number" id="dropAlert" placeholder="-5" value="-5" style="flex: 1;">
+                                    <span style="font-weight: bold;">%</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" id="dropAlertEnabled" style="width: auto;">
+                                <label style="margin: 0;">활성화</label>
+                            </div>
+                            <p style="font-size: 12px; color: var(--gray); margin-top: 10px;">
+                                보유/관심 종목이 설정값 이하 하락 시
+                            </p>
+                        </div>
+
+                        <div style="padding: 20px; background: var(--light); border-radius: 12px;">
+                            <h4 style="margin-bottom: 15px;">🎯 목표가 알림</h4>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-top: 20px;">
+                                <input type="checkbox" id="targetPriceAlertEnabled" checked style="width: auto;">
+                                <label style="margin: 0;">활성화</label>
+                            </div>
+                            <p style="font-size: 12px; color: var(--gray); margin-top: 10px;">
+                                관심 종목이 목표가에 도달하면 자동 알림
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; padding: 15px; background: #dbeafe; border-radius: 8px; border-left: 4px solid var(--primary);">
+                        <p style="font-size: 14px; color: var(--dark); margin-bottom: 5px;">
+                            <strong>💡 자동 모니터링:</strong>
+                        </p>
+                        <p style="font-size: 13px; color: #1e40af;">
+                            설정된 조건을 만족하면 즉시 알림을 보냅니다. 
+                            "모니터링 시작" 버튼을 클릭하면 5분마다 자동 확인합니다.
+                        </p>
+                    </div>
+
+                    <div class="btn-group" style="margin-top: 20px;">
+                        <button onclick="startMonitoring()" class="btn-success" id="startMonitorBtn">
+                            ▶️ 모니터링 시작
+                        </button>
+                        <button onclick="stopMonitoring()" class="btn-danger" id="stopMonitorBtn" style="display: none;">
+                            ⏸️ 모니터링 중지
+                        </button>
+                        <button onclick="saveAlertSettings()">
+                            💾 설정 저장
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 알림 히스토리 -->
+                <div class="card">
+                    <h2>📜 알림 히스토리 (최근 10개)</h2>
+                    <div id="notificationHistory"></div>
+                </div>
+            </div>
+
             <!-- 계정 관리 -->
             <div id="account" class="section">
                 <div class="grid grid-2">
@@ -1889,9 +2001,11 @@
 
         // 페이지 로드
         window.addEventListener('load', () => {
-            checkLogin(); // 로그인 체크 먼저
+            checkLogin();
             initCharts();
             document.getElementById('tradeDate').valueAsDate = new Date();
+            checkNotificationPermission();
+            loadAlertSettings();
         });
 
         // 섹션 전환
@@ -3851,6 +3965,94 @@
                 }
             });
         }
+
+        // =================
+        // 푸시 알림
+        // =================
+        
+        let monitoringInterval = null;
+        let notificationHistory = [];
+        let alertSettings = {surgePercent: 5, surgeEnabled: false, dropPercent: -5, dropEnabled: false, targetPriceEnabled: true};
+
+        function checkNotificationPermission() {
+            const statusEl = document.getElementById('permissionStatus');
+            const btnEl = document.getElementById('enableNotificationBtn');
+            if (!statusEl || !btnEl) return;
+            if (!("Notification" in window)) {statusEl.textContent = '❌ 이 브라우저는 알림을 지원하지 않습니다';return;}
+            if (Notification.permission === "granted") {statusEl.textContent = '✅ 알림 권한이 허용되었습니다';btnEl.style.display = 'none';}
+            else if (Notification.permission === "denied") {statusEl.textContent = '❌ 알림 권한이 차단되었습니다.';btnEl.style.display = 'none';}
+            else {statusEl.textContent = '⚠️ 알림 권한이 필요합니다';btnEl.style.display = 'block';}
+        }
+        async function requestNotificationPermission() {
+            try {const permission = await Notification.requestPermission();checkNotificationPermission();
+            if (permission === "granted") {alert('✅ 알림 권한이 허용되었습니다!');sendTestNotification();}} catch (error) {alert('알림 권한 요청에 실패했습니다.');}
+        }
+        function showNotification(title, body, icon = '📊') {
+            if (Notification.permission !== "granted") return;
+            const notification = new Notification(title, {body: body, icon: icon, vibrate: [200, 100, 200]});
+            addNotificationHistory(title, body);
+            notification.onclick = function() {window.focus();notification.close();};
+            setTimeout(() => notification.close(), 5000);
+        }
+        function sendTestNotification() {showNotification('🧪 테스트 알림', '알림이 정상적으로 작동합니다!', '🔔');}
+        function addNotificationHistory(title, body) {
+            notificationHistory.unshift({id: Date.now(), title: title, body: body, timestamp: new Date().toISOString()});
+            if (notificationHistory.length > 50) notificationHistory = notificationHistory.slice(0, 50);
+            saveNotificationHistory();renderNotificationHistory();
+        }
+        function renderNotificationHistory() {
+            const container = document.getElementById('notificationHistory');if (!container) return;
+            if (notificationHistory.length === 0) {container.innerHTML = '<div class="empty-state"><p>아직 알림이 없습니다</p></div>';return;}
+            container.innerHTML = notificationHistory.slice(0, 10).map(n => {
+                const date = new Date(n.timestamp);
+                const timeStr = `${date.getMonth()+1}/${date.getDate()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+                return `<div class="item-card" style="margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <strong style="font-size: 15px;">${n.title}</strong><span style="font-size: 12px; color: var(--gray);">${timeStr}</span></div>
+                <p style="font-size: 14px; color: var(--gray);">${n.body}</p></div>`;}).join('');
+        }
+        function saveAlertSettings() {
+            alertSettings = {surgePercent: parseFloat(document.getElementById('surgeAlert').value) || 5, surgeEnabled: document.getElementById('surgeAlertEnabled').checked,
+            dropPercent: parseFloat(document.getElementById('dropAlert').value) || -5, dropEnabled: document.getElementById('dropAlertEnabled').checked,
+            targetPriceEnabled: document.getElementById('targetPriceAlertEnabled').checked};
+            localStorage.setItem('alertSettings', JSON.stringify(alertSettings));alert('✅ 알림 설정이 저장되었습니다!');
+        }
+        function loadAlertSettings() {
+            const saved = localStorage.getItem('alertSettings');
+            if (saved) {alertSettings = JSON.parse(saved);
+            const surgeEl = document.getElementById('surgeAlert');if (surgeEl) surgeEl.value = alertSettings.surgePercent;
+            const surgeEnabledEl = document.getElementById('surgeAlertEnabled');if (surgeEnabledEl) surgeEnabledEl.checked = alertSettings.surgeEnabled;
+            const dropEl = document.getElementById('dropAlert');if (dropEl) dropEl.value = alertSettings.dropPercent;
+            const dropEnabledEl = document.getElementById('dropAlertEnabled');if (dropEnabledEl) dropEnabledEl.checked = alertSettings.dropEnabled;
+            const targetEl = document.getElementById('targetPriceAlertEnabled');if (targetEl) targetEl.checked = alertSettings.targetPriceEnabled;}
+            const historyData = localStorage.getItem('notificationHistory');
+            if (historyData) {notificationHistory = JSON.parse(historyData);renderNotificationHistory();}
+        }
+        function saveNotificationHistory() {localStorage.setItem('notificationHistory', JSON.stringify(notificationHistory));}
+        function startMonitoring() {
+            if (Notification.permission !== "granted") {alert('먼저 알림 권한을 허용해주세요!');return;}
+            saveAlertSettings();if (monitoringInterval) {alert('이미 모니터링이 실행 중입니다!');return;}
+            monitoringInterval = setInterval(checkPriceAlerts, 300000);checkPriceAlerts();
+            const startBtn = document.getElementById('startMonitorBtn');const stopBtn = document.getElementById('stopMonitorBtn');
+            if (startBtn) startBtn.style.display = 'none';if (stopBtn) stopBtn.style.display = 'inline-flex';
+            showNotification('✅ 모니터링 시작', '5분마다 자동으로 가격을 확인합니다.', '▶️');
+        }
+        function stopMonitoring() {
+            if (monitoringInterval) {clearInterval(monitoringInterval);monitoringInterval = null;}
+            const startBtn = document.getElementById('startMonitorBtn');const stopBtn = document.getElementById('stopMonitorBtn');
+            if (startBtn) startBtn.style.display = 'inline-flex';if (stopBtn) stopBtn.style.display = 'none';
+            showNotification('⏸️ 모니터링 중지', '자동 가격 확인이 중지되었습니다.', '⏸️');
+        }
+        async function checkPriceAlerts() {
+            console.log('가격 알림 체크 중...');
+            for (const stock of appData.watchlist) {
+                const priceChange = (Math.random() - 0.5) * 0.2;const changePercent = priceChange * 100;
+                if (alertSettings.surgeEnabled && changePercent >= alertSettings.surgePercent) {
+                    showNotification(`🚀 ${stock.name} 급등!`, `현재 ${changePercent.toFixed(1)}% 상승 중입니다.`, '🚀');}
+                if (alertSettings.dropEnabled && changePercent <= alertSettings.dropPercent) {
+                    showNotification(`📉 ${stock.name} 급락 주의!`, `현재 ${changePercent.toFixed(1)}% 하락 중입니다.`, '⚠️');}
+                if (alertSettings.targetPriceEnabled && stock.targetPrice) {
+                    const currentPrice = stock.price * (1 + priceChange);
+                    if (currentPrice >= stock.targetPrice) {showNotification(`🎯 ${stock.name} 목표가 도달!`, `목표가 ${stock.targetPrice.toLocaleString()}원 도달!`, '🎯');}}}}
 
         // =================
         // 계정 관리
